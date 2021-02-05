@@ -1,0 +1,4 @@
+tree:
+    max_depth: 20
+    max_children: 5
+    tolerance: 0.2
