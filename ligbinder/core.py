@@ -30,7 +30,11 @@ class LigBinder():
             engine = AmberMDEngine(node.path, **SETTINGS["md"])
             engine.run()
             node.calc_node_rmsd()
-    
+        self.compile_results()
+
+    def compile_results(self):
+        pass
+
     def setup_hmr(self):
         if not SETTINGS["md"]["use_hmr"]:
             return

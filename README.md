@@ -6,9 +6,12 @@ dependencies automatic installation is disabled as BSC rejects outgoing traffic 
 
 make sure your environment has a working installation of:
 
+python packages:
 * pyyaml
 * pytraj
-* parmed (python bindings)
+* parmed
+
+binaries:
 * pmemd.cuda
 * sander (optional)
 
@@ -118,5 +121,14 @@ md:
                                 # it is useful for debugging, but too slow for production.
 ```
 
-## running in cte-power
+## running in cte-power9
 
+it will be probably already installed over there, but in case it is not, just follow the instructions to install it.  
+
+there's an example submission script at `clusters/cte-power9-example.sh`
+
+## running in kraken
+
+same story as cte-power9.  
+
+the example submissino script is `clusters/kraken-example.sh`
