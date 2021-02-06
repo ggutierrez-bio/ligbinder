@@ -2,9 +2,9 @@ import os
 from typing import Optional
 from parmed.amber import AmberParm
 from parmed.tools.actions import HMassRepartition
-from samplematic.settings import Settings
-from samplematic.tree import Node, Tree
-from samplematic.md import AmberMDEngine
+from ligbinder.settings import Settings
+from ligbinder.tree import Node, Tree
+from ligbinder.md import AmberMDEngine
 
 
 class LigBinder():

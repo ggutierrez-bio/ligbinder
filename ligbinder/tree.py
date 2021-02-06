@@ -5,7 +5,7 @@ from typing import Dict
 import pytraj
 import logging
 
-from samplematic.settings import Settings
+from ligbinder.settings import Settings
 
 logger = logging.getLogger(__file__)
 

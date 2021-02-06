@@ -1,7 +1,7 @@
 import os
 import yaml
 from typing import Optional
-import samplematic
+import ligbinder
 
 
 class Settings:
@@ -17,8 +17,8 @@ class Settings:
 
     @staticmethod
     def get_defaults_filename():
-        samplematic_home = os.getenv("SAMPLEMATIC_HOME")
-        path = samplematic_home if samplematic_home is not None else os.path.join(samplematic.__path__[0], "data")
+        ligbinder_home = os.getenv("LIGBINDER_HOME")
+        path = ligbinder_home if ligbinder_home is not None else os.path.join(ligbinder.__path__[0], "data")
         return os.path.join(path, "defaults", "config.yml")
 
     @staticmethod
