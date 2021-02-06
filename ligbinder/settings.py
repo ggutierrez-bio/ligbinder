@@ -18,8 +18,7 @@ class Settings:
         self.data: dict = self.load_data(self.filename)
         self.get = self.data.get                                                                                                                                                                                                                                                                                                                                                                                                                                                        
         if filename is not None:
-            self.merge(self.load_data(filename))
-            self.filename = filename
+            self.update_settings_with_file(filename)
         
     def __getitem__(self, k):
         return self.data[k]
@@ -29,6 +28,10 @@ class Settings:
 
     def __contains__(self, k):
         return k in self.data
+
+    def update_settings_with_file(self, filename: str):
+        self.merge(self.load_data(filename))
+        self.filename = filename
 
     @staticmethod
     def get_defaults_filename():
@@ -66,3 +69,6 @@ class Settings:
                 else:
                     dict1[key] = dict2[key]
         _merge(self.data, data)
+
+
+SETTINGS = Settings()

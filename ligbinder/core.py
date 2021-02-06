@@ -2,7 +2,7 @@ import os
 from typing import Optional
 from parmed.amber import AmberParm
 from parmed.tools.actions import HMassRepartition
-from ligbinder.settings import Settings
+from ligbinder.settings import SETTINGS
 from ligbinder.tree import Node, Tree
 from ligbinder.md import AmberMDEngine
 
@@ -10,8 +10,8 @@ from ligbinder.md import AmberMDEngine
 class LigBinder():
     def __init__(self, path: str = ".", config_file: Optional[str] = None) -> None:
         self.path = path
-        self.settings = Settings(self.get_config_file(config_file))
-        self.tree = Tree(self.path, **self.settings.get("tree"))
+        SETTINGS.update_settings_with_file(self.get_config_file(config_file))
+        self.tree = Tree(self.path, **SETTINGS["tree"])
 
     def get_config_file(self, config_file: Optional[str] = None) -> Optional[str]:
         local_default_config_file = os.path.join(self.path, "config.yml")
@@ -24,17 +24,17 @@ class LigBinder():
     def run(self):
         self.setup_hmr()
         if len(self.tree.nodes) == 0:
-            self.tree.create_root_node(**self.settings.get("data_files"))
+            self.tree.create_root_node(**SETTINGS["data_files"])
         while(not self.tree.has_converged() and self.tree.can_grow()):
             node: Node = self.tree.create_node_from_candidate()
-            engine = AmberMDEngine(node.path, **self.settings["md"])
+            engine = AmberMDEngine(node.path, **SETTINGS["md"])
             engine.run()
             node.calc_node_rmsd()
     
     def setup_hmr(self):
-        if not self.settings["md"]["use_hmr"]:
+        if not SETTINGS["md"]["use_hmr"]:
             return
-        top_file = self.settings["data_files"]["top_file"]
+        top_file = SETTINGS["data_files"]["top_file"]
         parm = AmberParm(top_file)
         HMassRepartition(parm).execute()
         parm.write_parm(top_file)

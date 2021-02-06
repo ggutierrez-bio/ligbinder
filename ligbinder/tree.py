@@ -5,7 +5,7 @@ from typing import Dict
 import pytraj
 import logging
 
-from ligbinder.settings import Settings
+from ligbinder.settings import SETTINGS
 
 logger = logging.getLogger(__file__)
 
@@ -67,13 +67,12 @@ class Node:
 
 class Tree():
 
-    def __init__(self, path: str = ".", max_children: int = 5, max_depth: int = 15, tolerance: float = 0.5, settings = None) -> None:
+    def __init__(self, path: str = ".", max_children: int = 5, max_depth: int = 15, tolerance: float = 0.5) -> None:
         self.path = path
         self.max_children = max_children
         self.max_depth = max_depth
         self.tolerance = tolerance
         self.nodes: Dict[int, Node] = {}
-        self.settings = settings if settings is not None else Settings()
         self.load_nodes()
 
     def load_nodes(self) -> Dict[int, Node]:
@@ -111,9 +110,9 @@ class Tree():
         rel_crd_file = os.path.relpath(crd_file, node_path)
         rel_top_file = os.path.relpath(top_file, node_path)
         rel_ref_file = os.path.relpath(ref_file, node_path)
-        os.link(rel_crd_file, os.path.join(node_path, self.settings["md"]["rst_file"]))
-        os.link(rel_top_file, os.path.join(node_path, self.settings["md"]["top_file"]))
-        os.link(rel_ref_file, os.path.join(node_path, self.settings["md"]["ref_file"]))
+        os.link(rel_crd_file, os.path.join(node_path, SETTINGS["md"]["rst_file"]))
+        os.link(rel_top_file, os.path.join(node_path, SETTINGS["md"]["top_file"]))
+        os.link(rel_ref_file, os.path.join(node_path, SETTINGS["md"]["ref_file"]))
         node = Node(node_path, id, None)
         node.calc_node_rmsd()
         node.depth = 0
@@ -125,8 +124,8 @@ class Tree():
         node = self.create_node(
             new_id,
             parent.id,
-            self.settings["data_files"]["ref_file"],
-            self.settings["datafiles"]["top_file"]
+            SETTINGS["data_files"]["ref_file"],
+            SETTINGS["datafiles"]["top_file"]
         )
         
     def choose_candidate_node(self) -> Node:

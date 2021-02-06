@@ -31,3 +31,5 @@ md:
     use_gpu: true               # specify md engine version to use. use pmemd.cuda by default.
                                 # if use_gpu is set to false, sander is used instead.
                                 # it is useful for debugging, but too slow for production.
+
+config_file: "config.yml"
