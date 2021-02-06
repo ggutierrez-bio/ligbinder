@@ -4,20 +4,31 @@ from typing import Optional
 import sys
 import site
 import logging
+import collections
 
 
 logger = logging.getLogger(__file__)
 
 class Settings:
 
+    
     def __init__(self, filename: Optional[str] = None) -> None:
+        super().__init__()
         self.filename = self.get_defaults_filename()
         self.data: dict = self.load_data(self.filename)
-        self.get = self.data.get
-        self.__getitem__ = self.data.__getitem__
+        self.get = self.data.get                                                                                                                                                                                                                                                                                                                                                                                                                                                        
         if filename is not None:
-            self.data.update(self.load_data(filename))
+            self.merge(self.load_data(filename))
             self.filename = filename
+        
+    def __getitem__(self, k):
+        return self.data[k]
+
+    def __len__(self):
+        return len(self.data)
+
+    def __contains__(self, k):
+        return k in self.data
 
     @staticmethod
     def get_defaults_filename():
@@ -36,3 +47,22 @@ class Settings:
         with open(filename, 'r') as file:
             d = yaml.load(file, Loader=yaml.FullLoader)
         return d if d is not None else {}
+
+    def merge(self, data):
+        def _merge(dict1, dict2):
+            for key, value in dict2.items():
+                if (
+                    key in dict1
+                    and isinstance(dict1[key], dict)
+                    and isinstance(value, collections.Mapping)
+                ):
+                    _merge(dict1[key], value)
+                elif (
+                    key in dict1
+                    and isinstance(dict1[key], list)
+                    and isinstance(value, list)
+                ):
+                    dict1[key] += value
+                else:
+                    dict1[key] = dict2[key]
+        _merge(self.data, data)
