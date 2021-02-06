@@ -9,6 +9,8 @@ class Settings:
     def __init__(self, filename: Optional[str] = None) -> None:
         self.filename = self.get_defaults_filename()
         self.data: dict = self.load_data(self.filename)
+        self.get = self.data.get
+        self.__getitem__ = self.data.__getitem__
         if filename is not None:
             self.data.update(self.load_data(filename))
             self.filename = filename

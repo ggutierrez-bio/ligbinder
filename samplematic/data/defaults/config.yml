@@ -2,3 +2,25 @@ tree:
     max_depth: 20
     max_children: 5
     tolerance: 0.2
+
+data_files:
+    crd_file: "./data/pose.rst7"
+    top_file: "./data/top.prmtop"
+    ref_file: "./data/ref.crd"
+
+system:
+    protein_mask: "@CA"
+    ligand_mask: ":LIG"
+
+md:
+    crd_file: "initial.rst7"
+    top_file: "top.prmtop"
+    trj_file: "traj.nc"
+    rst_file: "final.rst7"
+    ref_file: "ref.crd"
+    log_file: "md.log"
+    inp_file: "md.in"
+    use_hmr: true
+    iteration_steps: 250000
+    tstep: 4
+    use_gpu: true
