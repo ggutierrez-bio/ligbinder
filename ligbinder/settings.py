@@ -2,7 +2,8 @@ import os
 import yaml
 from typing import Optional
 import ligbinder
-
+import sys
+import site
 
 class Settings:
 
@@ -18,8 +19,13 @@ class Settings:
     @staticmethod
     def get_defaults_filename():
         ligbinder_home = os.getenv("LIGBINDER_HOME")
-        path = ligbinder_home if ligbinder_home is not None else os.path.join(ligbinder.__path__[0], "data")
-        return os.path.join(path, "defaults", "config.yml")
+        home_candidates = [ligbinder_home]
+        home_candidates += [os.path.join(sys.prefix, "ligbinder")]
+        home_candidates += [os.path.join(path, "ligbinder") for path in site.PREFIXES]
+        home_candidates = [home for home in home_candidates if home is not None and os.path.exists(home)]
+        configs = [os.path.join(path, "default_config.yml") for path in home_candidates]
+        config = [config for config in configs if os.path.exists(config)][0]
+        return config
 
     @staticmethod
     def load_data(filename: str) -> dict:

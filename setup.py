@@ -9,10 +9,10 @@ setup(
     author='Guillermo Gutierrez',
     author_email='',
     url='',
-    packages=['ligbinder'],
+    packages=['ligbinder', 'ligbinder.data'],
     # as an example of additional data:
-    # inlcude_package_data=True,
-    # package_data={'ligbinder.data':[ligbinder/data/*]}
-    scripts=['ligbinder'],
-    install_requires=["pytraj>=2"]
+    inlcude_package_data=True,
+    data_files=[("ligbinder",["ligbinder/data/default_config.yml"])],
+    scripts=['bin/ligbinder'],
+    #install_requires=["pytraj>=2"]
 )
