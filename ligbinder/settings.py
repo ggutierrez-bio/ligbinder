@@ -1,9 +1,12 @@
 import os
 import yaml
 from typing import Optional
-import ligbinder
 import sys
 import site
+import logging
+
+
+logger = logging.getLogger(__file__)
 
 class Settings:
 
@@ -25,6 +28,7 @@ class Settings:
         home_candidates = [home for home in home_candidates if home is not None and os.path.exists(home)]
         configs = [os.path.join(path, "default_config.yml") for path in home_candidates]
         config = [config for config in configs if os.path.exists(config)][0]
+        logger.info(f"Using {config} for default settings")
         return config
 
     @staticmethod
