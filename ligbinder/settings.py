@@ -43,6 +43,7 @@ class Settings:
             for home in home_candidates
             if home is not None and os.path.exists(home)
         ]
+        logger.info(f"Searching for ligbinder home in: {home_candidates}")
         configs = [os.path.join(path, "default_config.yml") for path in home_candidates]
         config = [config for config in configs if os.path.exists(config)][0]
         logger.info(f"Using {config} for default settings")
