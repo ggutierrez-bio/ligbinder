@@ -19,7 +19,7 @@ def basic_tree(tmpdir):
     return tree
 
 
-def test_tree_create_root_node(basic_tree):
+def test_tree_create_root_node(basic_tree: Tree):
     node = basic_tree.create_root_node()
     assert node.rmsd == pytest.approx(16.4291511)
     assert node.parent_id is None

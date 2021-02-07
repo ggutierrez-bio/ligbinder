@@ -60,7 +60,9 @@ class Node:
             logger.warning(
                 f"Unable to calculate rmsd for node {self.node_id}. Some files are missing"
             )
-        traj = pytraj.autoimage(pytraj.load(crd_file, top=top_file))
+        traj = pytraj.load(crd_file, top=top_file)
+        # this one is causing some trouble in CI. need to inspect why, though.
+        # traj = pytraj.autoimage(traj)
         ref = pytraj.load(ref_file, top=top_file)
         pytraj.rmsd(traj, mask=SETTINGS["system"]["protein_mask"], ref=ref)
         self.rmsd = float(
