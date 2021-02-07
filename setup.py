@@ -11,7 +11,7 @@ setup(
     url='https://github.com/ggutierrez-bio/ligbinder',
     packages=['ligbinder'],
     inlcude_package_data=True,
-    data_files=[("ligbinder",["ligbinder/data/default_config.yml"])],
+    data_files=[("ligbinder", ["ligbinder/data/default_config.yml"])],
     scripts=['bin/ligbinder'],
-    #install_requires=["pytraj>=2"]
+    # install_requires=["pytraj>=2"]
 )

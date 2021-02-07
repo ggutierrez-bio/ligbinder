@@ -7,7 +7,7 @@ from ligbinder.tree import Node, Tree
 from ligbinder.md import AmberMDEngine
 
 
-class LigBinder():
+class LigBinder:
     def __init__(self, path: str = ".", config_file: Optional[str] = None) -> None:
         self.path = path
         SETTINGS.update_settings_with_file(self.get_config_file(config_file))
@@ -25,7 +25,7 @@ class LigBinder():
         self.setup_hmr()
         if len(self.tree.nodes) == 0:
             self.tree.create_root_node(**SETTINGS["data_files"])
-        while(not self.tree.has_converged() and self.tree.can_grow()):
+        while not self.tree.has_converged() and self.tree.can_grow():
             node: Node = self.tree.create_node_from_candidate()
             engine = AmberMDEngine(node.path, **SETTINGS["md"])
             engine.run()

@@ -33,3 +33,9 @@ md:
                                 # it is useful for debugging, but too slow for production.
 
 config_file: "config.yml"
+
+results:
+    join_trajectories: true
+    report_dir: "results"
+    node_indices: "nodes.lst"
+    

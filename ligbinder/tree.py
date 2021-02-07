@@ -12,8 +12,9 @@ logger = logging.getLogger(__file__)
 
 
 class Node:
-
-    def __init__(self, path: str, id: int, parent_id: int, rmsd: float = None, depth: int = None) -> None:
+    def __init__(
+        self, path: str, id: int, parent_id: int, rmsd: float = None, depth: int = None
+    ) -> None:
         self.path = path
         self.node_id = id
         self.parent_id = parent_id
@@ -38,37 +39,43 @@ class Node:
 
     @staticmethod
     def load_node_info(filename) -> dict:
-        with open(filename, 'r') as cfg_file:
+        with open(filename, "r") as cfg_file:
             return yaml.load(cfg_file, Loader=yaml.FullLoader)
 
     def write_node_info(self) -> None:
         filename = os.path.join(self.path, ".info.yml")
-        with open(filename, 'w') as file:
-            yaml.dump({
-                "parent_id": self.parent_id,
-                "rmsd": self.rmsd
-            }, file)
+        with open(filename, "w") as file:
+            yaml.dump({"parent_id": self.parent_id, "rmsd": self.rmsd}, file)
 
     def get_relative_file(self, filename) -> str:
         return os.path.relpath(os.path.join(self.path, filename))
 
     def calc_node_rmsd(self) -> float:
-        crd_file = self.get_relative_file("final.rst7")
-        top_file = self.get_relative_file("top.prmtop")
-        ref_file = self.get_relative_file("ref.crd")
+        crd_file = self.get_relative_file(SETTINGS["md"]["rst_file"])
+        top_file = self.get_relative_file(SETTINGS["md"]["top_file"])
+        ref_file = self.get_relative_file(SETTINGS["md"]["ref_file"])
         if not all(os.path.exists(file) for file in [crd_file, top_file, ref_file]):
-            logger.warning(f"Unable to calculate rmsd for node {self.node_id}. Some files are missing")
+            logger.warning(
+                f"Unable to calculate rmsd for node {self.node_id}. Some files are missing"
+            )
         traj = pytraj.autoimage(pytraj.load(crd_file, top=top_file))
         ref = pytraj.load(ref_file, top=top_file)
         pytraj.rmsd(traj, mask=SETTINGS["system"]["protein_mask"], ref=ref)
-        self.rmsd = float(pytraj.rmsd_nofit(traj, mask=SETTINGS["system"]["ligand_mask"], ref=ref)[0])
+        self.rmsd = float(
+            pytraj.rmsd_nofit(traj, mask=SETTINGS["system"]["ligand_mask"], ref=ref)[0]
+        )
         self.write_node_info()
         return self.rmsd
 
 
-class Tree():
-
-    def __init__(self, path: str = ".", max_children: int = 5, max_depth: int = 15, tolerance: float = 0.5) -> None:
+class Tree:
+    def __init__(
+        self,
+        path: str = ".",
+        max_children: int = 5,
+        max_depth: int = 15,
+        tolerance: float = 0.5,
+    ) -> None:
         self.path = path
         self.max_children = max_children
         self.max_depth = max_depth
@@ -78,57 +85,86 @@ class Tree():
 
     def load_nodes(self) -> Dict[int, Node]:
         node_paths = glob(f"{self.path}/node_*/")
-        #nodes = [Node(node_path, Node.get_id_from_path(node_path)) for node_path in node_paths]
         nodes = [Node.load_node(node_path) for node_path in node_paths]
         self.nodes = {node.node_id: node for node in nodes}
-        [self.nodes[node.parent_id].children.append(node) for node in nodes if node.parent_id is not None]
+        [
+            self.nodes[node.parent_id].children.append(node)
+            for node in nodes
+            if node.parent_id is not None
+        ]
         self.set_depths()
         return self.nodes
 
     def get_next_id(self) -> int:
         return max(list(self.nodes), default=0) + 1
 
-    def create_node(self, parent_id: int, ref_file: Optional[str] = None, top_file: Optional[str] = None) -> Node:
+    def create_node(
+        self,
+        parent_id: int,
+        ref_file: Optional[str] = None,
+        top_file: Optional[str] = None,
+    ) -> Node:
         id = self.get_next_id()
         node_path = os.path.join(self.path, f"node_{id}")
         os.mkdir(node_path)
         parent_path = os.path.join(os.path.pardir, f"node_{parent_id}")
-        top_file = top_file if top_file is not None else os.path.join(self.path, SETTINGS["data_files"]["top_file"])
+        top_file = (
+            top_file
+            if top_file is not None
+            else os.path.join(self.path, SETTINGS["data_files"]["top_file"])
+        )
         rel_top_file = os.path.relpath(top_file, node_path)
         os.symlink(rel_top_file, os.path.join(node_path, SETTINGS["md"]["top_file"]))
 
-        ref_file = ref_file if ref_file is not None else os.path.join(self.path, SETTINGS["data_files"]["ref_file"])
+        ref_file = (
+            ref_file
+            if ref_file is not None
+            else os.path.join(self.path, SETTINGS["data_files"]["ref_file"])
+        )
         rel_ref_file = os.path.relpath(ref_file, node_path)
         os.symlink(rel_ref_file, os.path.join(node_path, SETTINGS["md"]["ref_file"]))
 
         initial_frame = os.path.join(parent_path, SETTINGS["md"]["rst_file"])
         os.symlink(initial_frame, os.path.join(node_path, SETTINGS["md"]["crd_file"]))
-        
+
         parent_node = self.nodes[parent_id]
         node = Node(node_path, id, parent_id, depth=parent_node.depth + 1)
         node.write_node_info()
         self.nodes[id] = node
+        parent_node.children.append(node)
         return node
 
     def create_root_node(
         self,
         crd_file: Optional[str] = None,
         top_file: Optional[str] = None,
-        ref_file: Optional[str] = None
+        ref_file: Optional[str] = None,
     ) -> Node:
         node_id = 0
         node_path = os.path.relpath(os.path.join(self.path, f"node_{node_id}"))
         os.mkdir(node_path)
 
-        crd_file = crd_file if crd_file is not None else os.path.join(self.path, SETTINGS["data_files"]["crd_file"])
+        crd_file = (
+            crd_file
+            if crd_file is not None
+            else os.path.join(self.path, SETTINGS["data_files"]["crd_file"])
+        )
         rel_crd_file = os.path.relpath(crd_file, node_path)
         os.symlink(rel_crd_file, os.path.join(node_path, SETTINGS["md"]["rst_file"]))
 
-        top_file = top_file if top_file is not None else os.path.join(self.path, SETTINGS["data_files"]["top_file"])
+        top_file = (
+            top_file
+            if top_file is not None
+            else os.path.join(self.path, SETTINGS["data_files"]["top_file"])
+        )
         rel_top_file = os.path.relpath(top_file, node_path)
         os.symlink(rel_top_file, os.path.join(node_path, SETTINGS["md"]["top_file"]))
 
-        ref_file = ref_file if ref_file is not None else os.path.join(self.path, SETTINGS["data_files"]["ref_file"])
+        ref_file = (
+            ref_file
+            if ref_file is not None
+            else os.path.join(self.path, SETTINGS["data_files"]["ref_file"])
+        )
         rel_ref_file = os.path.relpath(ref_file, node_path)
         os.symlink(rel_ref_file, os.path.join(node_path, SETTINGS["md"]["ref_file"]))
 
@@ -143,12 +179,15 @@ class Tree():
         node = self.create_node(
             parent.node_id,
             SETTINGS["data_files"]["ref_file"],
-            SETTINGS["datafiles"]["top_file"]
+            SETTINGS["data_files"]["top_file"],
         )
         return node
-        
+
     def choose_candidate_node(self) -> Node:
-        candidate: Node = [node for node in self.nodes.values() if self.is_expandable(node)].sort(key=lambda n: n.rmsd)[0]
+        candidate: Node = sorted(
+            [node for node in self.nodes.values() if self.is_expandable(node)],
+            key=lambda n: n.rmsd,
+        )[0]
         logger.info(f"New candidate selected: {candidate.node_id}")
         return candidate
 
@@ -168,7 +207,9 @@ class Tree():
         return can_grow
 
     def is_expandable(self, node: Node) -> bool:
-        parent_rmsd = self.nodes[node.parent_id].rmsd if node.parent_id is not None else math.inf
+        parent_rmsd = (
+            self.nodes[node.parent_id].rmsd if node.parent_id is not None else math.inf
+        )
         is_expandable = not (
             node.depth >= self.max_depth
             or len(node.children) >= self.max_children
@@ -179,7 +220,9 @@ class Tree():
         return is_expandable
 
     def has_converged(self) -> bool:
-        has_converged = any(node.rmsd <= self.tolerance for node in list(self.nodes.values()))
+        has_converged = any(
+            node.rmsd <= self.tolerance for node in list(self.nodes.values())
+        )
         msg = "Tree converged " if has_converged else "Tree didn't converge "
         msg += f"after exploring {len(self.nodes)}"
         logger.info(msg)

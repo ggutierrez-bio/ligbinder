@@ -9,17 +9,16 @@ import collections
 
 logger = logging.getLogger(__file__)
 
-class Settings:
 
-    
+class Settings:
     def __init__(self, filename: Optional[str] = None) -> None:
         super().__init__()
         self.filename = self.get_defaults_filename()
         self.data: dict = self.load_data(self.filename)
-        self.get = self.data.get                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+        self.get = self.data.get
         if filename is not None:
             self.update_settings_with_file(filename)
-        
+
     def __getitem__(self, k):
         return self.data[k]
 
@@ -39,7 +38,11 @@ class Settings:
         home_candidates = [ligbinder_home]
         home_candidates += [os.path.join(sys.prefix, "ligbinder")]
         home_candidates += [os.path.join(path, "ligbinder") for path in site.PREFIXES]
-        home_candidates = [home for home in home_candidates if home is not None and os.path.exists(home)]
+        home_candidates = [
+            home
+            for home in home_candidates
+            if home is not None and os.path.exists(home)
+        ]
         configs = [os.path.join(path, "default_config.yml") for path in home_candidates]
         config = [config for config in configs if os.path.exists(config)][0]
         logger.info(f"Using {config} for default settings")
@@ -47,7 +50,7 @@ class Settings:
 
     @staticmethod
     def load_data(filename: str) -> dict:
-        with open(filename, 'r') as file:
+        with open(filename, "r") as file:
             d = yaml.load(file, Loader=yaml.FullLoader)
         return d if d is not None else {}
 
@@ -68,6 +71,7 @@ class Settings:
                     dict1[key] += value
                 else:
                     dict1[key] = dict2[key]
+
         _merge(self.data, data)
 
 
