@@ -6,7 +6,7 @@ from .conftest import FPATH
 def test_settings_defaults():
     s = Settings()
     assert s["tree"]["max_depth"] == 20
-    assert len(s) == 5
+    assert len(s) == 6
     assert "md" in s.data
 
 
