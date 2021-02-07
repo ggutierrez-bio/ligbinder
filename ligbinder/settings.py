@@ -35,10 +35,12 @@ class Settings:
     @staticmethod
     def get_defaults_filename():
         ligbinder_home = os.getenv("LIGBINDER_HOME")
+        paths = [sys.prefix, os.path.join(sys.prefix, "local")]
+        paths += site.PREFIXES 
+        paths += ["/usr", "/usr/local"]
         home_candidates = [ligbinder_home]
-        home_candidates += [os.path.join(sys.prefix, "ligbinder")]
-        home_candidates += [os.path.join(path, "ligbinder") for path in site.PREFIXES]
-        logger.error(f"Searching for ligbinder home in: {home_candidates}")
+        home_candidates += [os.path.join(path, "ligbinder") for path in paths]
+        logger.info(f"Searching for ligbinder home in: {home_candidates}")
         home_candidates = [
             home
             for home in home_candidates
