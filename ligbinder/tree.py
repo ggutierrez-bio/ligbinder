@@ -36,7 +36,7 @@ class Node:
     def get_id_from_path(path: str):
         sep = os.path.sep
         node_rel_path = path.rstrip(sep).split(sep)[-1]
-        return int(node_rel_path[len("node_") :])
+        return int(node_rel_path[len("node_"):])
 
     @staticmethod
     def load_node_info(filename) -> dict:
@@ -60,7 +60,9 @@ class Node:
             logger.warning(
                 f"Unable to calculate rmsd for node {self.node_id}. Some files are missing"
             )
-        traj = pytraj.autoimage(pytraj.load(crd_file, top=top_file))
+        traj = pytraj.load(crd_file, top=top_file)
+        # this one is causing some trouble in CI. need to inspect why, though.
+        # traj = pytraj.autoimage(traj)
         ref = pytraj.load(ref_file, top=top_file)
         pytraj.rmsd(traj, mask=SETTINGS["system"]["protein_mask"], ref=ref)
         self.rmsd = float(

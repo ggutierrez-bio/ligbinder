@@ -4,7 +4,7 @@ from typing import Optional
 import sys
 import site
 import logging
-import collections
+from collections.abc import Mapping
 
 
 logger = logging.getLogger(__file__)
@@ -35,16 +35,20 @@ class Settings:
     @staticmethod
     def get_defaults_filename():
         ligbinder_home = os.getenv("LIGBINDER_HOME")
+        paths = [sys.prefix, os.path.join(sys.prefix, "local")]
+        paths += site.PREFIXES
+        paths += ["/usr", "/usr/local"]
         home_candidates = [ligbinder_home]
-        home_candidates += [os.path.join(sys.prefix, "ligbinder")]
-        home_candidates += [os.path.join(path, "ligbinder") for path in site.PREFIXES]
+        home_candidates += [os.path.join(path, "ligbinder") for path in paths]
+        logger.info(f"Searching for ligbinder home in: {home_candidates}")
         home_candidates = [
             home
             for home in home_candidates
             if home is not None and os.path.exists(home)
         ]
         configs = [os.path.join(path, "default_config.yml") for path in home_candidates]
-        config = [config for config in configs if os.path.exists(config)][0]
+        logger.info(f"found configs: {configs}")
+        config = next(iter([config for config in configs if os.path.exists(config)]), "config.yml")
         logger.info(f"Using {config} for default settings")
         return config
 
@@ -60,7 +64,7 @@ class Settings:
                 if (
                     key in dict1
                     and isinstance(dict1[key], dict)
-                    and isinstance(value, collections.Mapping)
+                    and isinstance(value, Mapping)
                 ):
                     _merge(dict1[key], value)
                 elif (

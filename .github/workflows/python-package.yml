@@ -1,0 +1,30 @@
+# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: Python package
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: ggutierrezbio/ambertools20:latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install package and requirements
+      run: |
+        python3 -m pip install --upgrade pip
+        python3 -m pip install -r requirements.txt
+        python3 -m pip install -v .
+        python3 -m pip install -r dev-requirements.txt
+    - name: Test with pytest
+      run: |
+        pytest -v --log-level INFO
+    - name: linting
+      run: |
+        flake8 .
