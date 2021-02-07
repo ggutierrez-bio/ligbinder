@@ -4,7 +4,7 @@ from typing import Optional
 import sys
 import site
 import logging
-import collections
+from collections.abc import Mapping
 
 
 logger = logging.getLogger(__file__)
@@ -43,9 +43,9 @@ class Settings:
             for home in home_candidates
             if home is not None and os.path.exists(home)
         ]
-        logger.info(f"Searching for ligbinder home in: {home_candidates}")
+        logger.error(f"Searching for ligbinder home in: {home_candidates}")
         configs = [os.path.join(path, "default_config.yml") for path in home_candidates]
-        config = [config for config in configs if os.path.exists(config)][0]
+        config = next([config for config in configs if os.path.exists(config)], default="config.yml")
         logger.info(f"Using {config} for default settings")
         return config
 
@@ -61,7 +61,7 @@ class Settings:
                 if (
                     key in dict1
                     and isinstance(dict1[key], dict)
-                    and isinstance(value, collections.Mapping)
+                    and isinstance(value, Mapping)
                 ):
                     _merge(dict1[key], value)
                 elif (
