@@ -47,7 +47,7 @@ class Settings:
             if home is not None and os.path.exists(home)
         ]
         configs = [os.path.join(path, "default_config.yml") for path in home_candidates]
-        logger.error(f"found configs: {configs}")
+        logger.info(f"found configs: {configs}")
         config = next(iter([config for config in configs if os.path.exists(config)]), "config.yml")
         logger.info(f"Using {config} for default settings")
         return config
