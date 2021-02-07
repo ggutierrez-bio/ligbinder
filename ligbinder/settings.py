@@ -36,7 +36,7 @@ class Settings:
     def get_defaults_filename():
         ligbinder_home = os.getenv("LIGBINDER_HOME")
         paths = [sys.prefix, os.path.join(sys.prefix, "local")]
-        paths += site.PREFIXES 
+        paths += site.PREFIXES
         paths += ["/usr", "/usr/local"]
         home_candidates = [ligbinder_home]
         home_candidates += [os.path.join(path, "ligbinder") for path in paths]
