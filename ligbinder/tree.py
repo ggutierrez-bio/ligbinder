@@ -36,7 +36,7 @@ class Node:
     def get_id_from_path(path: str):
         sep = os.path.sep
         node_rel_path = path.rstrip(sep).split(sep)[-1]
-        return int(node_rel_path[len("node_"):])
+        return int(node_rel_path[len("node_") :])
 
     @staticmethod
     def load_node_info(filename) -> dict:
