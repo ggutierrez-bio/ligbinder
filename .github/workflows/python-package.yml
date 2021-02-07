@@ -22,9 +22,9 @@ jobs:
         python3 -m pip install -r requirements.txt
         python3 -m pip install -v .
         python3 -m pip install -r dev-requirements.txt
-    - name: linting
-      run: |
-        flake8 .
     - name: Test with pytest
       run: |
         pytest -v --log-level INFO
+    - name: linting
+      run: |
+        flake8 .
