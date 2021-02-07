@@ -37,5 +37,7 @@ config_file: "config.yml"
 results:
     join_trajectories: true
     report_dir: "results"
-    node_indices: "nodes.lst"
-    
+    idx_file: "nodes.lst"
+    trj_file: "full_path.nc"
+    rms_file: "nodes.rmsd"
+    stats_file: "stats.txt"

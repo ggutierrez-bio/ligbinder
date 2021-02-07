@@ -1,7 +1,7 @@
 from glob import glob
 import os
 import yaml
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 import pytraj
 import logging
 import math
@@ -24,6 +24,7 @@ class Node:
 
     @staticmethod
     def load_node(path: str) -> "Node":
+        logger.info(f"loading node from {path}")
         filename = f"{path}/.info.yml"
         config: dict = Node.load_node_info(filename)
         id = Node.get_id_from_path(path)
@@ -51,6 +52,7 @@ class Node:
         return os.path.relpath(os.path.join(self.path, filename))
 
     def calc_node_rmsd(self) -> float:
+        logger.info(f"calculating rmsd for node {self.node_id}")
         crd_file = self.get_relative_file(SETTINGS["md"]["rst_file"])
         top_file = self.get_relative_file(SETTINGS["md"]["top_file"])
         ref_file = self.get_relative_file(SETTINGS["md"]["ref_file"])
@@ -227,3 +229,17 @@ class Tree:
         msg += f"after exploring {len(self.nodes)}"
         logger.info(msg)
         return has_converged
+
+    def get_best_node(self) -> Node:
+        return sorted([node for node in self.nodes.values()], key=lambda n: n.rmsd)[0]
+
+    def get_solution_path(self) -> List[int]:
+        node_ids = []
+        if self.tree.has_converged():
+            node = self.tree.get_best_node()
+            node_ids.append(node.node_id)
+            while node.parent_id is not None:
+                node_ids.append(node.parent_id)
+                node = self.tree.nodes[node.parent_id]
+            node_ids.reverse()
+        return node_ids
