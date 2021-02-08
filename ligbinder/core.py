@@ -44,7 +44,7 @@ class LigBinder:
             parent_rmsd = self.tree.nodes[node.parent_id].rmsd
             if node.rmsd < parent_rmsd:
                 logger.info(
-                    f"Node {node.id} improved rmsd by {parent_rmsd - node.rmsd}! current rmsd: {node.rmsd}"
+                    f"Node {node.node_id} improved rmsd by {parent_rmsd - node.rmsd}! current rmsd: {node.rmsd}"
                 )
         logger.info("Exploration finished.")
         Reprorter(self.tree).compile_results()
