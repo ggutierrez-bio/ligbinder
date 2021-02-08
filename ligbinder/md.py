@@ -24,6 +24,8 @@ class AmberMDEngine:
         tstep=4.0,
         use_gpu=True,
         use_hmr=True,
+        apply_restraints=True,
+        restraint_force=1.0
     ) -> None:
 
         self.crd_file = os.path.join(
@@ -53,11 +55,13 @@ class AmberMDEngine:
 
         self.use_gpu = use_gpu
         self.binary = "pmemd.cuda" if self.use_gpu else "sander"
-
+        self.apply_restraints = apply_restraints
+        self.restraint_force = restraint_force
         self.use_hmr = use_hmr
 
     def write_input(self):
         interval = self.steps // 10
+        restraints = f'restraint_wt={self.restraint_force}, restraint_mask=\'{SETTINGS["system"]["restraint_mask"]}\','
         lines = [
             "#  Constant Volume",
             "&cntrl",
@@ -67,10 +71,12 @@ class AmberMDEngine:
             "ntc=2, ntf=2,",
             "ntb=1, cut=9.0,",
             "ntt=3, gamma_ln=4.0, ig=-1,",
-            "temp0=300, ",
+            "temp0=300,",
+            restraints,
             "&end",
             ""
         ]
+        lines = [line for line in lines if line is not None]
         msg = "\n".join(lines)
         with open(self.inp_file, "w") as file:
             file.write(msg)
