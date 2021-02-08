@@ -1,4 +1,3 @@
-import shutil
 import os
 from distutils.dir_util import copy_tree
 
