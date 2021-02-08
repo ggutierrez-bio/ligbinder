@@ -9,13 +9,14 @@ from ligbinder.tree import Node, Tree
 from ligbinder.md import AmberMDEngine
 
 
-logger = logging.getLogger(__file__)
+logger = logging.getLogger(__name__)
 
 
 class LigBinder:
     def __init__(self, path: str = ".", config_file: Optional[str] = None) -> None:
         self.path = path
-        SETTINGS.update_settings_with_file(self.get_config_file(config_file))
+        if config_file is not None:
+            SETTINGS.update_settings_with_file(self.get_config_file(config_file))
         self.tree = Tree(self.path, **SETTINGS["tree"])
 
     def get_config_file(self, config_file: Optional[str] = None) -> Optional[str]:
@@ -33,14 +34,17 @@ class LigBinder:
             self.tree.create_root_node(**SETTINGS["data_files"])
         while not self.tree.has_converged() and self.tree.can_grow():
             node: Node = self.tree.create_node_from_candidate()
-            logger.info(f"New node chosen for expansion. Current depth: {node.depth}")
+            logger.info("New node chosen for expansion.")
+            logger.info(f"\tdepth: {node.depth}/{self.tree.max_depth}")
+            parent_rmsd = self.tree.nodes[node.parent_id].rmsd
+            logger.info(f"\trmsd: {parent_rmsd}")
             engine = AmberMDEngine(node.path, **SETTINGS["md"])
             engine.run()
             node.calc_node_rmsd()
             parent_rmsd = self.tree.nodes[node.parent_id].rmsd
             if node.rmsd < parent_rmsd:
                 logger.info(
-                    f"Node {node.rmsd} improved rmsd by {parent_rmsd - node.rmsd}! current rmsd: {node.rmsd}"
+                    f"Node {node.id} improved rmsd by {parent_rmsd - node.rmsd}! current rmsd: {node.rmsd}"
                 )
         logger.info("Exploration finished.")
         Reprorter(self.tree).compile_results()

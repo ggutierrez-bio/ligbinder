@@ -27,7 +27,7 @@ md:
     inp_file: "md.in"           # default name for md input file
     use_hmr: true               # use hydrogen mass repartitioning. default is true
     tstep: 4                    # integration time of 4fs. reduce to 2 if use_hmr is set to false
-    iteration_steps: 250000     # md steps. 250k * 4fs = 1 nano per node
+    steps: 250000               # md steps. 250k * 4fs = 1 nano per node
     use_gpu: true               # specify md engine version to use. use pmemd.cuda by default.
                                 # if use_gpu is set to false, sander is used instead.
                                 # it is useful for debugging, but too slow for production.

@@ -2,7 +2,10 @@
 
 import argparse
 import logging
+import os
 from ligbinder.core import LigBinder
+from ligbinder.settings import SETTINGS
+
 
 def get_parser():
     parser = argparse.ArgumentParser()
@@ -20,8 +23,8 @@ def get_parser():
     )
     parser.add_argument(
         "-v", "--verbosity",
-        help="set verbosity level. default is WARNING",
-        default="WARNING",
+        help="set verbosity level. default is INFO",
+        default="INFO",
         choices=["INFO", "WARNING", "ERROR", "CRITICAL"]
     )
     parser.add_argument(
@@ -34,6 +37,11 @@ def get_parser():
 
 parser = get_parser()
 args = parser.parse_args()
+
 logging.basicConfig(level=args.verbosity, filename=args.log, filemode='w')
-ligbinder = LigBinder(path=args.path, config_file=args.config)
+
+config_file = args.config if args.config is not None else os.path.join(args.path, SETTINGS["config_file"])
+config_file = config_file if os.path.exists(config_file) else None
+
+ligbinder = LigBinder(path=args.path, config_file=config_file)
 ligbinder.run()

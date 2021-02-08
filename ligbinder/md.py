@@ -6,7 +6,7 @@ import logging
 from ligbinder.settings import SETTINGS
 
 
-logger = logging.getLogger(__file__)
+logger = logging.getLogger(__name__)
 
 
 class AmberMDEngine:
@@ -23,6 +23,7 @@ class AmberMDEngine:
         steps=250000,
         tstep=4.0,
         use_gpu=True,
+        use_hmr=True,
     ) -> None:
 
         self.crd_file = os.path.join(
@@ -53,12 +54,14 @@ class AmberMDEngine:
         self.use_gpu = use_gpu
         self.binary = "pmemd.cuda" if self.use_gpu else "sander"
 
+        self.use_hmr = use_hmr
+
     def write_input(self):
         interval = self.steps // 10
         lines = [
             "#  Constant Volume",
             "&cntrl",
-            "ntx=5, irest=0, iwrap=1,",
+            "ntx=1, irest=0, iwrap=1,",
             f"ntxo=2, ntpr={interval}, ntwx={interval}, ntwv=0, ntwe=0, ioutfm=1,",
             f"nstlim={self.steps}, dt={self.tstep/1000},",
             "ntc=2, ntf=2,",
@@ -66,24 +69,27 @@ class AmberMDEngine:
             "ntt=3, gamma_ln=4.0, ig=-1,",
             "temp0=300, ",
             "&end",
+            ""
         ]
+        msg = "\n".join(lines)
         with open(self.inp_file, "w") as file:
-            file.writelines(lines)
+            file.write(msg)
 
     def run(self):
         self.write_input()
         cmd = self._get_command()
-        logger.info(f'Running md engine: {" ".join(cmd)}')
+        logger.info('Running md engine')
+        logger.debug(f'{" ".join(cmd)}')
         return subprocess.run(self._get_command(), check=True)
 
     def _get_command(self) -> List[str]:
         return [
             self.binary,
             "-O",
-            f"-i {self.inp_file}",
-            f"-o {self.log_file}",
-            f"-p {self.top_file}",
-            f"-c {self.crd_file}",
-            f"-r {self.rst_file}",
-            f"-x {self.trj_file}",
+            "-i", f"{self.inp_file}",
+            "-o", f"{self.log_file}",
+            "-p", f"{self.top_file}",
+            "-c", f"{self.crd_file}",
+            "-r", f"{self.rst_file}",
+            "-x", f"{self.trj_file}",
         ]

@@ -1,5 +1,6 @@
 import shutil
 import os
+from distutils.dir_util import copy_tree
 
 from ligbinder.tree import Tree
 
@@ -9,7 +10,7 @@ from .conftest import FPATH
 
 def copy_input_files_to_tmpdir(tmpdir):
     project_folder = os.path.join(FPATH, "project")
-    shutil.copytree(project_folder, tmpdir, dirs_exist_ok=True)
+    copy_tree(str(project_folder), str(tmpdir))
 
 
 @pytest.fixture

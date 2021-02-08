@@ -7,7 +7,7 @@ import logging
 from collections.abc import Mapping
 
 
-logger = logging.getLogger(__file__)
+logger = logging.getLogger(__name__)
 
 
 class Settings:

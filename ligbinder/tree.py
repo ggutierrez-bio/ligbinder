@@ -8,7 +8,7 @@ import math
 
 from ligbinder.settings import SETTINGS
 
-logger = logging.getLogger(__file__)
+logger = logging.getLogger(__name__)
 
 
 class Node:
@@ -192,7 +192,7 @@ class Tree:
             [node for node in self.nodes.values() if self.is_expandable(node)],
             key=lambda n: n.rmsd,
         )[0]
-        logger.info(f"New candidate selected: {candidate.node_id}")
+        logger.info(f"candidate selected: {candidate.node_id}")
         return candidate
 
     def set_depths(self):
@@ -207,7 +207,7 @@ class Tree:
     def can_grow(self):
         can_grow = any(self.is_expandable(node) for node in list(self.nodes.values()))
         if not can_grow:
-            logger.warning("Tree can't grow any bigger")
+            logger.warning("tree can't grow any bigger")
         return can_grow
 
     def is_expandable(self, node: Node) -> bool:
@@ -220,7 +220,7 @@ class Tree:
             or node.rmsd >= parent_rmsd
         )
         if not is_expandable:
-            logger.info(f"Node {node.node_id} can't be expanded")
+            logger.debug(f"node {node.node_id} can't be expanded")
         return is_expandable
 
     def has_converged(self) -> bool:

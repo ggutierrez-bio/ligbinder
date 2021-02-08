@@ -7,7 +7,7 @@ from ligbinder.settings import SETTINGS
 from ligbinder.tree import Tree
 
 
-logger = logging.getLogger(__file__)
+logger = logging.getLogger(__name__)
 
 
 class Reprorter:
@@ -39,13 +39,13 @@ class Reprorter:
     def _write_node_list_file(self, indices: List[int]):
         node_list_file = os.path.join(self.report_dir, SETTINGS["results"]["idx_file"])
         with open(node_list_file, "w") as idx_file:
-            idx_file.writelines(indices)
+            idx_file.write("\n".join(indices))
 
     def _write_rmsd_file(self, indices: List[int]):
         rmsd_file = os.path.join(self.report_dir, SETTINGS["results"]["rms_file"])
         rmsds = [self.tree.nodes[index].rmsd for index in indices]
         with open(rmsd_file, "w") as rms_file:
-            rms_file.writelines(rmsds)
+            rms_file.write("\n".join(rmsds))
 
     def _write_stats(self, indices: List[int]):
         stats_filename = os.path.join(
