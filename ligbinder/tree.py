@@ -64,7 +64,8 @@ class Node:
         # this one is causing some trouble in CI. need to inspect why, though.
         # traj = pytraj.autoimage(traj)
         ref = pytraj.load(ref_file, top=top_file)
-        pytraj.rmsd(traj, mask=SETTINGS["system"]["protein_mask"], ref=ref)
+        align_mask = SETTINGS["system"]["protein_mask"]
+        pytraj.rmsd(traj, mask=align_mask, ref=ref, ref_mask=align_mask)
         self.rmsd = float(
             pytraj.rmsd_nofit(traj, mask=SETTINGS["system"]["ligand_mask"], ref=ref)[0]
         )
