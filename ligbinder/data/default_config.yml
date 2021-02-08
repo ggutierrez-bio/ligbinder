@@ -4,9 +4,9 @@
 # or specifying a file to ligbinder with the --config argument
 
 tree:
-    max_depth: 20       # maximum number of successive iterations
-    max_children: 5     # maximum number of dynamics spawn from a single intermediate iteration
-    tolerance: 0.2      # rmsd tolerance to accept a node as a hit
+    max_depth: 20                   # maximum number of successive iterations
+    max_children: 10                # maximum number of dynamics spawn from a single intermediate iteration
+    tolerance: 0.5                  # rmsd tolerance to accept a node as a hit
 
 data_files:
     crd_file: "./data/pose.rst7"    # default location for project starting pose
@@ -14,23 +14,26 @@ data_files:
     ref_file: "./data/ref.crd"      # default location for project reference file
 
 system:
-    protein_mask: "@CA"     # mask for system alignment
-    ligand_mask: ":LIG"     # mask for ligand rmsd calculation
+    protein_mask: "@CA"             # mask for system alignment
+    ligand_mask: ":LIG"             # mask for ligand rmsd calculation
+    restraints_mask: "@CA & !@H="   # mask for restraints
 
 md:
-    crd_file: "initial.rst7"    # default name for node starting file
-    top_file: "top.prmtop"      # default name for node topology file
-    trj_file: "traj.nc"         # default name for node trajectory file
-    rst_file: "final.rst7"      # default name for node final structure file
-    ref_file: "ref.crd"         # default name for node reference file
-    log_file: "md.log"          # default name for md logging file
-    inp_file: "md.in"           # default name for md input file
-    use_hmr: true               # use hydrogen mass repartitioning. default is true
-    tstep: 4                    # integration time of 4fs. reduce to 2 if use_hmr is set to false
-    steps: 250000               # md steps. 250k * 4fs = 1 nano per node
-    use_gpu: true               # specify md engine version to use. use pmemd.cuda by default.
-                                # if use_gpu is set to false, sander is used instead.
-                                # it is useful for debugging, but too slow for production.
+    crd_file: "initial.rst7"        # default name for node starting file
+    top_file: "top.prmtop"          # default name for node topology file
+    trj_file: "traj.nc"             # default name for node trajectory file
+    rst_file: "final.rst7"          # default name for node final structure file
+    ref_file: "ref.crd"             # default name for node reference file
+    log_file: "md.log"              # default name for md logging file
+    inp_file: "md.in"               # default name for md input file
+    use_hmr: true                   # use hydrogen mass repartitioning. default is true
+    tstep: 4                        # integration time of 4fs. reduce to 2 if use_hmr is set to false
+    steps: 250000                   # md steps. 250k * 4fs = 1 nano per node
+    apply_restraints: true          # if true, apply restraints based on system.restraint_mask
+    restraint_force: 1.0            # in kcal/mol A^2
+    use_gpu: true                   # specify md engine version to use. use pmemd.cuda by default.
+                                    # if use_gpu is set to false, sander is used instead.
+                                    # it is useful for debugging, but too slow for production.
 
 config_file: "config.yml"
 
