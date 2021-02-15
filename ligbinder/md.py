@@ -62,6 +62,7 @@ class AmberMDEngine:
     def write_input(self):
         interval = self.steps // 10
         restraints = f'restraint_wt={self.restraint_force}, restraint_mask=\'{SETTINGS["system"]["restraint_mask"]}\','
+        restraints = restraints if self.apply_restraints else ""
         lines = [
             "#  Constant Volume",
             "&cntrl",
@@ -89,13 +90,14 @@ class AmberMDEngine:
         return subprocess.run(self._get_command(), check=True)
 
     def _get_command(self) -> List[str]:
-        return [
+        command = [
             self.binary,
             "-O",
             "-i", f"{self.inp_file}",
             "-o", f"{self.log_file}",
             "-p", f"{self.top_file}",
             "-c", f"{self.crd_file}",
-            "-r", f"{self.rst_file}",
             "-x", f"{self.trj_file}",
         ]
+        command += ["-r", f"{self.rst_file}"] if self.apply_restraints else []
+        return command
