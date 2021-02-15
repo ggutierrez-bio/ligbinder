@@ -27,11 +27,13 @@ class Reprorter:
         ]
         top_file = os.path.join(self.path, SETTINGS["data_files"]["top_file"])
         ref_file = os.path.join(self.path, SETTINGS["data_files"]["ref_file"])
+        ref_top_file = os.path.join(self.path, SETTINGS["data_files"]["ref_top_file"])
         full_traj_file = os.path.join(self.report_dir, SETTINGS["results"]["trj_file"])
 
         # load, align write
-        traj = pytraj.iterload(traj_files, top=top_file)
-        ref = pytraj.load(ref_file, top=top_file)
+        load_mask = SETTINGS["system"]["load_mask"]
+        traj = pytraj.iterload(traj_files, top=top_file, mask=load_mask)
+        ref = pytraj.load(ref_file, top=ref_top_file, mask=load_mask)
         mask = SETTINGS["system"]["protein_mask"]
         pytraj.rmsd(traj, mask=mask, ref=ref)
         pytraj.write_traj(full_traj_file, traj)

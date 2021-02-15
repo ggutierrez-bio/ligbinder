@@ -9,15 +9,23 @@ tree:
     tolerance: 0.5                  # rmsd tolerance to accept a node as a hit
 
 data_files:
-    crd_file: "./data/pose.rst7"    # default location for project starting pose
-    top_file: "./data/top.prmtop"   # default location for project topology file
-    ref_file: "./data/ref.crd"      # default location for project reference file
+    crd_file: "./data/pose.rst7"        # default location for project starting pose
+    top_file: "./data/top.prmtop"       # default location for project topology file
+    ref_file: "./data/ref.crd"          # default location for project reference file
+    ref_top_file: "./data/top.prmtop"   # default location for project reference topology
+                                        # it will usually be the same as the trajectory, but
+                                        # just in case, this can be also configured
 
 system:
-    protein_mask: "@CA"             # mask for system alignment
-    ligand_mask: ":LIG"             # mask for ligand rmsd calculation
-    restraints_mask: "@CA & !@H="   # mask for restraints
-
+    protein_mask: "@CA&!:LIG"           # mask for system alignment.
+                                        # default is alpha carbon and not a ligand atom
+    ligand_mask: ":LIG&!@H="            # mask for ligand rmsd calculation
+                                        # default is ligand atoms that are not hydrogen
+    restraints_mask: "@CA&!:LIG"        # mask for restraints
+                                        # default is alpha carbon and not a ligand atom
+    load_mask: "@CA|(:LIG&!@H=)"        # mask for system loading.
+                                        # reference and problem system must end up having
+                                        # equivalent topologies when this mask is applied
 md:
     crd_file: "initial.rst7"        # default name for node starting file
     top_file: "top.prmtop"          # default name for node topology file
