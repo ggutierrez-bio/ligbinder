@@ -98,6 +98,7 @@ class AmberMDEngine:
             "-p", f"{self.top_file}",
             "-c", f"{self.crd_file}",
             "-x", f"{self.trj_file}",
+            "-r", f"{self.rst_file}"
         ]
-        command += ["-r", f"{self.rst_file}"] if self.apply_restraints else []
+        command += ["-ref", f"{self.ref_file}"] if self.apply_restraints else []
         return command
