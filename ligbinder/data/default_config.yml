@@ -21,7 +21,7 @@ system:
                                         # default is alpha carbon and not a ligand atom
     ligand_mask: ":LIG&!@H="            # mask for ligand rmsd calculation
                                         # default is ligand atoms that are not hydrogen
-    restraints_mask: "@CA&!:LIG"        # mask for restraints
+    restraint_mask: "@CA&!:LIG"        # mask for restraints
                                         # default is alpha carbon and not a ligand atom
     load_mask: "@CA|(:LIG&!@H=)"        # mask for system loading.
                                         # reference and problem system must end up having
