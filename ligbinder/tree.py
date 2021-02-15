@@ -145,6 +145,7 @@ class Tree:
         crd_file: Optional[str] = None,
         top_file: Optional[str] = None,
         ref_file: Optional[str] = None,
+        ref_top_file: Optional[str] = None
     ) -> Node:
         node_id = 0
         node_path = os.path.relpath(os.path.join(self.path, f"node_{node_id}"))
