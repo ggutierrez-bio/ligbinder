@@ -61,7 +61,7 @@ class AmberMDEngine:
 
     def write_input(self):
         interval = self.steps // 10
-        restraints = f'restraint_wt={self.restraint_force}, restraint_mask=\'{SETTINGS["system"]["restraint_mask"]}\','
+        restraints = f'restraint_wt={self.restraint_force}, restraintmask=\'{SETTINGS["system"]["restraint_mask"]}\','
         restraints = restraints if self.apply_restraints else ""
         lines = [
             "#  Constant Volume",
