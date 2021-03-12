@@ -84,7 +84,7 @@ class Tree:
         max_nodes: int = 500,
         min_relative_improvement: float = 0.1,
         min_absolute_improvement: float = 0.1,
-        max_setps_back: int = 5
+        max_steps_back: int = 5
     ) -> None:
         self.path = path
         self.max_children = max_children
@@ -93,7 +93,7 @@ class Tree:
         self.max_nodes = max_nodes
         self.min_relative_improvement = min_relative_improvement
         self.min_absolute_improvement = min_absolute_improvement
-        self.max_steps_back = max_setps_back
+        self.max_steps_back = max_steps_back
         self.nodes: Dict[int, Node] = {}
         self.load_nodes()
         self.current_max_depth = max([node.depth for node in self.nodes.values()] + [0])
