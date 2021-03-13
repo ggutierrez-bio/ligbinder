@@ -270,7 +270,8 @@ class Tree:
         while node.parent_id is not None:
             node_ids.append(node.parent_id)
             node = self.nodes[node.parent_id]
-        return node_ids.reverse()
+        node_ids.reverse()
+        return node_ids
 
     def get_biasing_power(self, node: Node) -> float:
         node_ids = self.get_path_to_node(node)
