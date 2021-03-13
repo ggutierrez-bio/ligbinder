@@ -118,6 +118,7 @@ class Tree:
         parent_id: int,
         ref_file: Optional[str] = None,
         top_file: Optional[str] = None,
+        ref_top_file: Optional[str] = None
     ) -> Node:
         id = self.get_next_id()
         node_path = os.path.join(self.path, f"node_{id}")
