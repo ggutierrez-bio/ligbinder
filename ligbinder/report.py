@@ -53,7 +53,7 @@ class Reporter:
         stats_filename = os.path.join(
             self.report_dir, SETTINGS["results"]["stats_file"]
         )
-        rmsd_sorted_nodes: List[Node] = sorted([node for node in self.tree.nodes.values()], lambda n: n.rmsd)
+        rmsd_sorted_nodes: List[Node] = sorted([node for node in self.tree.nodes.values()], key=lambda n: n.rmsd)
         report = {
             "converged": self.tree.has_converged(),
             "total_nodes": len(self.tree.nodes),
