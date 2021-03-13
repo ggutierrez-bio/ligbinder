@@ -65,10 +65,9 @@ class Reprorter:
 
     def compile_results(self):
         node_ids = self.tree.get_solution_path()
+        self._create_report_dir()
         if self.tree.has_converged():
             logger.warning("SUCCESS: LIGAND BOUND!!!")
-
-            self._create_report_dir()
             if SETTINGS["results"]["join_trajectories"]:
                 self._concat_trajectory(node_ids)
             self._write_node_list_file(node_ids)
