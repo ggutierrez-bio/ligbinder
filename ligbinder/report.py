@@ -4,13 +4,13 @@ from typing import List
 import pytraj
 import yaml
 from ligbinder.settings import SETTINGS
-from ligbinder.tree import Tree
+from ligbinder.tree import Tree, Node
 
 
 logger = logging.getLogger(__name__)
 
 
-class Reprorter:
+class Reporter:
     def __init__(self, tree: Tree) -> None:
         self.tree = tree
         self.path = tree.path
@@ -53,11 +53,13 @@ class Reprorter:
         stats_filename = os.path.join(
             self.report_dir, SETTINGS["results"]["stats_file"]
         )
+        rmsd_sorted_nodes: List[Node] = sorted([node for node in self.tree.nodes.values()], lambda n: n.rmsd)
         report = {
             "converged": self.tree.has_converged(),
             "total_nodes": len(self.tree.nodes),
             "max_depth": max([node.depth for node in self.tree.nodes.values()]),
-            "best_rmsd": min([node.rmsd for node in self.tree.nodes.values()]),
+            "best_rmsd": rmsd_sorted_nodes[0].rmsd,
+            "best_rmsd_node": rmsd_sorted_nodes[0].node_id,
             "node_path": indices,
         }
         with open(stats_filename, "w") as stats_file:

@@ -1,4 +1,4 @@
-from ligbinder.report import Reprorter
+from ligbinder.report import Reporter
 import os
 from typing import Optional
 import logging
@@ -46,7 +46,7 @@ class LigBinder:
                     f"Node {node.node_id} improved rmsd by {parent_rmsd - node.rmsd}! current rmsd: {node.rmsd}"
                 )
         logger.info("Exploration finished.")
-        Reprorter(self.tree).compile_results()
+        Reporter(self.tree).compile_results()
 
     def setup_hmr(self):
         if not SETTINGS["md"]["use_hmr"]:

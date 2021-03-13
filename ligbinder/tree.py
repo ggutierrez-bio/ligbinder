@@ -218,7 +218,10 @@ class Tree:
             self.set_node_depth(child, current_depth + 1)
 
     def can_grow(self):
-        can_grow = len(self.nodes) < self.max_nodes and any(self.is_expandable(node) for node in list(self.nodes.values()))
+        can_grow = (
+            len(self.nodes) < self.max_nodes
+            and any(self.is_expandable(node) for node in list(self.nodes.values()))
+        )
         if not can_grow:
             logger.warning("tree can't grow any bigger")
         return can_grow
@@ -229,7 +232,7 @@ class Tree:
         )
         node_depth_is_acceptable = self.max_depth > node.depth > (self.current_max_depth - self.max_steps_back)
         children_count_is_acceptable = len(node.children) < self.max_children
-        min_acceptable_rmsd =max(
+        min_acceptable_rmsd = max(
             parent_rmsd - self.min_absolute_improvement,
             parent_rmsd * (1 - self.min_relative_improvement)
         )
@@ -257,9 +260,13 @@ class Tree:
         node_ids = []
         if self.has_converged():
             node = self.get_best_node()
-            node_ids.append(node.node_id)
-            while node.parent_id is not None:
-                node_ids.append(node.parent_id)
-                node = self.nodes[node.parent_id]
-            node_ids.reverse()
+            node_ids = self.get_path_to_node(node)
         return node_ids
+
+    def get_path_to_node(self, node: Node) -> List[int]:
+        node_ids = []
+        node_ids.append(node.node_id)
+        while node.parent_id is not None:
+            node_ids.append(node.parent_id)
+            node = self.nodes[node.parent_id]
+        return node_ids.reverse()
