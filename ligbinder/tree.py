@@ -271,3 +271,9 @@ class Tree:
             node_ids.append(node.parent_id)
             node = self.nodes[node.parent_id]
         return node_ids.reverse()
+
+    def get_biasing_power(self, node: Node) -> float:
+        node_ids = self.get_path_to_node(node)
+        biasing_power = 1
+        for node_id in node_ids[:-1]:
+            biasing_power *= 1 / max(len(self.nodes[node_id].children), 1)

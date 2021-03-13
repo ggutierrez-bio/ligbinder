@@ -37,13 +37,13 @@ class LigBinder:
             logger.info("New node chosen for expansion.")
             logger.info(f"\tdepth: {node.depth}/{self.tree.max_depth}")
             parent_rmsd = self.tree.nodes[node.parent_id].rmsd
-            logger.info(f"\trmsd: {parent_rmsd}")
+            logger.info(f"\trmsd: {parent_rmsd:.3f}")
             engine = AmberMDEngine(node.path, **SETTINGS["md"])
             engine.run()
             node.calc_node_rmsd()
             if node.rmsd < parent_rmsd:
                 logger.info(
-                    f"Node {node.node_id} improved rmsd by {parent_rmsd - node.rmsd}! current rmsd: {node.rmsd}"
+                    f"Node {node.node_id} improved rmsd by {parent_rmsd - node.rmsd:.3f}! current rmsd: {node.rmsd:.3f}"
                 )
         logger.info("Exploration finished.")
         Reporter(self.tree).compile_results()

@@ -5,7 +5,7 @@ import pytraj
 import yaml
 from ligbinder.settings import SETTINGS
 from ligbinder.tree import Tree, Node
-
+import math
 
 logger = logging.getLogger(__name__)
 
@@ -54,13 +54,17 @@ class Reporter:
             self.report_dir, SETTINGS["results"]["stats_file"]
         )
         rmsd_sorted_nodes: List[Node] = sorted([node for node in self.tree.nodes.values()], key=lambda n: n.rmsd)
+        best_node = self.tree.get_best_node()
         report = {
             "converged": self.tree.has_converged(),
             "total_nodes": len(self.tree.nodes),
             "max_depth": max([node.depth for node in self.tree.nodes.values()]),
-            "best_rmsd": rmsd_sorted_nodes[0].rmsd,
-            "best_rmsd_node": rmsd_sorted_nodes[0].node_id,
-            "node_path": indices,
+            "best_node": {
+                "node_id": best_node.node_id,
+                "rmsd": best_node.rmsd,
+                "pBP": -math.log10(self.tree.get_biasing_power(best_node)),
+                "path": indices,
+            }
         }
         with open(stats_filename, "w") as stats_file:
             yaml.dump(report, stats_file)
