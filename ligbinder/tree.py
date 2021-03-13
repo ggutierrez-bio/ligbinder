@@ -156,7 +156,6 @@ class Tree:
         crd_file: Optional[str] = None,
         top_file: Optional[str] = None,
         ref_file: Optional[str] = None,
-        ref_top_file: Optional[str] = None
     ) -> Node:
         node_id = 0
         node_path = os.path.relpath(os.path.join(self.path, f"node_{node_id}"))
@@ -247,7 +246,7 @@ class Tree:
             node.rmsd <= self.tolerance for node in list(self.nodes.values())
         )
         msg = "Tree converged " if has_converged else "Tree didn't converge "
-        msg += f"after exploring {len(self.nodes)}"
+        msg += f"after exploring {len(self.nodes)}/{self.max_nodes}"
         logger.info(msg)
         return has_converged
 
@@ -256,11 +255,11 @@ class Tree:
 
     def get_solution_path(self) -> List[int]:
         node_ids = []
-        if self.tree.has_converged():
-            node = self.tree.get_best_node()
+        if self.has_converged():
+            node = self.get_best_node()
             node_ids.append(node.node_id)
             while node.parent_id is not None:
                 node_ids.append(node.parent_id)
-                node = self.tree.nodes[node.parent_id]
+                node = self.nodes[node.parent_id]
             node_ids.reverse()
         return node_ids
