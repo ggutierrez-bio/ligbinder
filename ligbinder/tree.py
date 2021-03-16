@@ -278,3 +278,4 @@ class Tree:
         biasing_power = 1
         for node_id in node_ids[:-1]:
             biasing_power *= 1 / max(len(self.nodes[node_id].children), 1)
+        return biasing_power

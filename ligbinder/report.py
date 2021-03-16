@@ -49,11 +49,11 @@ class Reporter:
         with open(rmsd_file, "w") as rms_file:
             rms_file.write("\n".join(rmsds))
 
-    def _write_stats(self, indices: List[int]):
+    def _write_stats(self):
         stats_filename = os.path.join(
             self.report_dir, SETTINGS["results"]["stats_file"]
         )
-        rmsd_sorted_nodes: List[Node] = sorted([node for node in self.tree.nodes.values()], key=lambda n: n.rmsd)
+
         best_node = self.tree.get_best_node()
         report = {
             "converged": self.tree.has_converged(),
@@ -63,7 +63,7 @@ class Reporter:
                 "node_id": best_node.node_id,
                 "rmsd": best_node.rmsd,
                 "pBP": -math.log10(self.tree.get_biasing_power(best_node)),
-                "path": indices,
+                "path": self.tree.get_path_to_node(best_node),
             }
         }
         with open(stats_filename, "w") as stats_file:
@@ -82,4 +82,4 @@ class Reporter:
             logger.warning("FAILURE: UNABLE TO BIND")
 
         logger.info("writing report")
-        self._write_stats(node_ids)
+        self._write_stats()
