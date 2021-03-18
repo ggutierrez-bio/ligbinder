@@ -4,7 +4,7 @@ from typing import List
 import pytraj
 import yaml
 from ligbinder.settings import SETTINGS
-from ligbinder.tree import Tree, Node
+from ligbinder.tree import Tree
 import math
 
 logger = logging.getLogger(__name__)
