@@ -5,12 +5,12 @@ import pytraj
 import yaml
 from ligbinder.settings import SETTINGS
 from ligbinder.tree import Tree
-
+import math
 
 logger = logging.getLogger(__name__)
 
 
-class Reprorter:
+class Reporter:
     def __init__(self, tree: Tree) -> None:
         self.tree = tree
         self.path = tree.path
@@ -49,26 +49,31 @@ class Reprorter:
         with open(rmsd_file, "w") as rms_file:
             rms_file.write("\n".join(rmsds))
 
-    def _write_stats(self, indices: List[int]):
+    def _write_stats(self):
         stats_filename = os.path.join(
             self.report_dir, SETTINGS["results"]["stats_file"]
         )
+
+        best_node = self.tree.get_best_node()
         report = {
             "converged": self.tree.has_converged(),
             "total_nodes": len(self.tree.nodes),
             "max_depth": max([node.depth for node in self.tree.nodes.values()]),
-            "best_rmsd": min([node.rmsd for node in self.tree.nodes.values()]),
-            "node_path": indices,
+            "best_node": {
+                "node_id": best_node.node_id,
+                "rmsd": best_node.rmsd,
+                "pBP": -math.log10(self.tree.get_biasing_power(best_node)),
+                "path": self.tree.get_path_to_node(best_node),
+            }
         }
         with open(stats_filename, "w") as stats_file:
             yaml.dump(report, stats_file)
 
     def compile_results(self):
         node_ids = self.tree.get_solution_path()
+        self._create_report_dir()
         if self.tree.has_converged():
             logger.warning("SUCCESS: LIGAND BOUND!!!")
-
-            self._create_report_dir()
             if SETTINGS["results"]["join_trajectories"]:
                 self._concat_trajectory(node_ids)
             self._write_node_list_file(node_ids)
@@ -77,4 +82,4 @@ class Reprorter:
             logger.warning("FAILURE: UNABLE TO BIND")
 
         logger.info("writing report")
-        self._write_stats(node_ids)
+        self._write_stats()

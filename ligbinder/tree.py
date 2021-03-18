@@ -81,13 +81,22 @@ class Tree:
         max_children: int = 5,
         max_depth: int = 15,
         tolerance: float = 0.5,
+        max_nodes: int = 500,
+        min_relative_improvement: float = 0.1,
+        min_absolute_improvement: float = 0.1,
+        max_steps_back: int = 5
     ) -> None:
         self.path = path
         self.max_children = max_children
         self.max_depth = max_depth
         self.tolerance = tolerance
+        self.max_nodes = max_nodes
+        self.min_relative_improvement = min_relative_improvement
+        self.min_absolute_improvement = min_absolute_improvement
+        self.max_steps_back = max_steps_back
         self.nodes: Dict[int, Node] = {}
         self.load_nodes()
+        self.current_max_depth = max([node.depth for node in self.nodes.values()] + [0])
 
     def load_nodes(self) -> Dict[int, Node]:
         node_paths = glob(f"{self.path}/node_*/")
@@ -138,6 +147,8 @@ class Tree:
         node.write_node_info()
         self.nodes[id] = node
         parent_node.children.append(node)
+        if node.depth > self.current_max_depth:
+            self.current_max_depth = node.depth
         return node
 
     def create_root_node(
@@ -208,7 +219,10 @@ class Tree:
             self.set_node_depth(child, current_depth + 1)
 
     def can_grow(self):
-        can_grow = any(self.is_expandable(node) for node in list(self.nodes.values()))
+        can_grow = (
+            len(self.nodes) < self.max_nodes
+            and any(self.is_expandable(node) for node in list(self.nodes.values()))
+        )
         if not can_grow:
             logger.warning("tree can't grow any bigger")
         return can_grow
@@ -217,11 +231,16 @@ class Tree:
         parent_rmsd = (
             self.nodes[node.parent_id].rmsd if node.parent_id is not None else math.inf
         )
-        is_expandable = not (
-            node.depth >= self.max_depth
-            or len(node.children) >= self.max_children
-            or node.rmsd >= parent_rmsd
+        node_depth_is_acceptable = self.max_depth > node.depth > (self.current_max_depth - self.max_steps_back)
+        children_count_is_acceptable = len(node.children) < self.max_children
+        min_acceptable_rmsd = max(
+            parent_rmsd - self.min_absolute_improvement,
+            parent_rmsd * (1 - self.min_relative_improvement)
         )
+        rmsd_improvement_is_enough = node.rmsd < min_acceptable_rmsd
+        is_expandable = all([
+            node_depth_is_acceptable, children_count_is_acceptable, rmsd_improvement_is_enough
+        ])
         if not is_expandable:
             logger.debug(f"node {node.node_id} can't be expanded")
         return is_expandable
@@ -231,7 +250,7 @@ class Tree:
             node.rmsd <= self.tolerance for node in list(self.nodes.values())
         )
         msg = "Tree converged " if has_converged else "Tree didn't converge "
-        msg += f"after exploring {len(self.nodes)}"
+        msg += f"after exploring {len(self.nodes)}/{self.max_nodes}"
         logger.info(msg)
         return has_converged
 
@@ -240,11 +259,23 @@ class Tree:
 
     def get_solution_path(self) -> List[int]:
         node_ids = []
-        if self.tree.has_converged():
-            node = self.tree.get_best_node()
-            node_ids.append(node.node_id)
-            while node.parent_id is not None:
-                node_ids.append(node.parent_id)
-                node = self.tree.nodes[node.parent_id]
-            node_ids.reverse()
+        if self.has_converged():
+            node = self.get_best_node()
+            node_ids = self.get_path_to_node(node)
         return node_ids
+
+    def get_path_to_node(self, node: Node) -> List[int]:
+        node_ids = []
+        node_ids.append(node.node_id)
+        while node.parent_id is not None:
+            node_ids.append(node.parent_id)
+            node = self.nodes[node.parent_id]
+        node_ids.reverse()
+        return node_ids
+
+    def get_biasing_power(self, node: Node) -> float:
+        node_ids = self.get_path_to_node(node)
+        biasing_power = 1
+        for node_id in node_ids[:-1]:
+            biasing_power *= 1 / max(len(self.nodes[node_id].children), 1)
+        return biasing_power

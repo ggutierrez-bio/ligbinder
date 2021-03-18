@@ -7,6 +7,10 @@ tree:
     max_depth: 20                   # maximum number of successive iterations
     max_children: 10                # maximum number of dynamics spawn from a single intermediate iteration
     tolerance: 0.5                  # rmsd tolerance to accept a node as a hit
+    max_nodes: 500                  # maximum number of nodes in total
+    min_relative_improvement: 0.1   # minimum rmsd improvement in relation to current rmsd. default is 10% (0.1)
+    min_absolute_improvement: 1.0   # minimum rmsd improvement in absolute value
+    max_steps_back: 5               # maximum difference between maximum depth reached and current depth
 
 data_files:
     crd_file: "./data/pose.rst7"        # default location for project starting pose
@@ -21,7 +25,7 @@ system:
                                         # default is alpha carbon and not a ligand atom
     ligand_mask: ":LIG&!@H="            # mask for ligand rmsd calculation
                                         # default is ligand atoms that are not hydrogen
-    restraint_mask: "@CA&!:LIG"        # mask for restraints
+    restraint_mask: "@CA&!:LIG"         # mask for restraints
                                         # default is alpha carbon and not a ligand atom
     load_mask: "@CA|(:LIG&!@H=)"        # mask for system loading.
                                         # reference and problem system must end up having

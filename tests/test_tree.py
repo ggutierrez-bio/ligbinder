@@ -74,7 +74,33 @@ def test_tree_expandability(basic_tree: Tree):
     basic_tree.create_root_node()
     node = basic_tree.create_node(0)
     node.rmsd = basic_tree.nodes[0].rmsd + 1
+    basic_tree.max_nodes = 1
+    assert basic_tree.can_grow() is False
+    basic_tree.max_nodes = 500
     assert basic_tree.can_grow()
     node = basic_tree.create_node_from_candidate()
     node.rmsd = basic_tree.nodes[0].rmsd + 1
     assert basic_tree.can_grow() is False
+
+
+def test_node_expandability(basic_tree: Tree):
+    basic_tree.create_root_node()
+    parent_rmsd = basic_tree.nodes[0].rmsd
+
+    # deactivate relative improvement check
+    basic_tree.min_relative_improvement = 1
+
+    node = basic_tree.create_node(0)
+    node.rmsd = parent_rmsd - 0.5 * basic_tree.min_absolute_improvement
+    assert basic_tree.is_expandable(node) is False
+    node.rmsd = parent_rmsd - 1.5 * basic_tree.min_absolute_improvement
+    assert basic_tree.is_expandable(node) is True
+
+    # deactivate absolute improvement check and reactivate relative
+    basic_tree.min_absolute_improvement = parent_rmsd
+    basic_tree.min_relative_improvement = 0.1
+
+    node.rmsd = parent_rmsd * (1 - 0.5 * basic_tree.min_relative_improvement)
+    assert basic_tree.is_expandable(node) is False
+    node.rmsd = parent_rmsd * (1 - 1.5 * basic_tree.min_relative_improvement)
+    assert basic_tree.is_expandable(node) is True
