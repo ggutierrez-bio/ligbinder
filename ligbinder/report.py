@@ -23,7 +23,7 @@ class Reporter:
         # get filenames
         traj_files = [
             os.path.join(self.path, f"node_{index}", SETTINGS["md"]["trj_file"])
-            for index in indices
+            for index in indices if index != 0
         ]
         top_file = os.path.join(self.path, SETTINGS["data_files"]["top_file"])
         ref_file = os.path.join(self.path, SETTINGS["data_files"]["ref_file"])
