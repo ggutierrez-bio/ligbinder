@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name="LigBinder",
-    version="0.1.1",
+    version="0.1.2",
     description="automatic targeted molecular dynamics for ligand bindning",
     author="Guillermo Gutierrez",
     author_email="",
