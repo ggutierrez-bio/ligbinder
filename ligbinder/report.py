@@ -41,13 +41,13 @@ class Reporter:
     def _write_node_list_file(self, indices: List[int]):
         node_list_file = os.path.join(self.report_dir, SETTINGS["results"]["idx_file"])
         with open(node_list_file, "w") as idx_file:
-            idx_file.write("\n".join(indices))
+            idx_file.write("\n".join(map(str, indices)))
 
     def _write_rmsd_file(self, indices: List[int]):
         rmsd_file = os.path.join(self.report_dir, SETTINGS["results"]["rms_file"])
         rmsds = [self.tree.nodes[index].rmsd for index in indices]
         with open(rmsd_file, "w") as rms_file:
-            rms_file.write("\n".join(rmsds))
+            rms_file.write("\n".join(map(str, rmsds)))
 
     def _write_stats(self):
         stats_filename = os.path.join(
