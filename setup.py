@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name="LigBinder",
-    version="0.1.2",
+    version="0.1.3",
     description="automatic targeted molecular dynamics for ligand bindning",
     author="Guillermo Gutierrez",
     author_email="",
@@ -13,5 +13,5 @@ setup(
     inlcude_package_data=True,
     data_files=[("ligbinder", ["ligbinder/data/default_config.yml"])],
     scripts=["bin/ligbinder"],
-    # install_requires=["pytraj>=2"]
+    install_requires=["numpy", "pyyaml", "pytraj>=2", "parmed"]
 )
