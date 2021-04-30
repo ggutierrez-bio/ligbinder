@@ -20,7 +20,7 @@ class Node:
         self.parent_id = parent_id
         self.rmsd = rmsd
         self.depth = depth
-        self.children = []
+        self.children: List[Node] = []
 
     @staticmethod
     def load_node(path: str) -> "Node":
@@ -100,7 +100,7 @@ class Tree:
 
     def load_nodes(self) -> Dict[int, Node]:
         node_paths = glob(f"{self.path}/node_*/")
-        nodes = [Node.load_node(node_path) for node_path in node_paths]
+        nodes: List[Node] = [Node.load_node(node_path) for node_path in node_paths]
         self.nodes = {node.node_id: node for node in nodes}
         [
             self.nodes[node.parent_id].children.append(node)
@@ -277,5 +277,13 @@ class Tree:
         node_ids = self.get_path_to_node(node)
         biasing_power = 1
         for node_id in node_ids[:-1]:
-            biasing_power *= 1 / max(len(self.nodes[node_id].children), 1)
+            parent_node = self.nodes[node_id]
+            sibling_nodes = [child for child in parent_node.children if child.node_id not in node_ids]
+            weights = sum(map(self.get_node_weight, sibling_nodes)) + 1
+            biasing_power *= 1 / weights
         return biasing_power
+
+    def get_node_weight(self, node: Node) -> float:
+        if len(node.children) == 0:
+            return 1
+        return sum(map(self.get_node_weight, node.children))

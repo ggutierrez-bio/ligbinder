@@ -104,3 +104,23 @@ def test_node_expandability(basic_tree: Tree):
     assert basic_tree.is_expandable(node) is False
     node.rmsd = parent_rmsd * (1 - 1.5 * basic_tree.min_relative_improvement)
     assert basic_tree.is_expandable(node) is True
+
+
+def test_node_weight(basic_tree: Tree):
+    root_node = basic_tree.create_root_node()
+    assert basic_tree.get_node_weight(root_node) == 1
+
+    node = basic_tree.create_node(0)
+    assert basic_tree.get_node_weight(root_node) == 1
+    assert basic_tree.get_node_weight(node) == 1
+
+    basic_tree.create_node(0)
+    last_node = basic_tree.create_node(0)
+    assert basic_tree.get_node_weight(root_node) == 3
+    assert basic_tree.get_node_weight(node) == 1
+
+    basic_tree.create_node(last_node.node_id)
+    basic_tree.create_node(last_node.node_id)
+    assert basic_tree.get_node_weight(root_node) == 4
+    assert basic_tree.get_node_weight(node) == 1
+    assert basic_tree.get_node_weight(last_node) == 2
