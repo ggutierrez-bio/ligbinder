@@ -62,6 +62,7 @@ class Reporter:
             "best_node": {
                 "node_id": best_node.node_id,
                 "rmsd": best_node.rmsd,
+                "nrmsd": best_node.nrmsd,
                 "pBP": -math.log10(self.tree.get_biasing_power(best_node)),
                 "path": self.tree.get_path_to_node(best_node),
             }
