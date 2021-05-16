@@ -39,7 +39,7 @@ class Settings:
         paths += site.PREFIXES
         paths += ["/usr", "/usr/local"]
         home_candidates = [ligbinder_home]
-        home_candidates += [os.path.join(path, "ligbinder") for path in paths]
+        home_candidates += [os.path.join(path, "ligbinder") for path in paths] + ["./ligbinder/data"]
         logger.info(f"Searching for ligbinder home in: {home_candidates}")
         home_candidates = [
             home

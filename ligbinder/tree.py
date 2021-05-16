@@ -13,12 +13,13 @@ logger = logging.getLogger(__name__)
 
 class Node:
     def __init__(
-        self, path: str, id: int, parent_id: int, rmsd: float = None, depth: int = None
+        self, path: str, id: int, parent_id: int, rmsd: float = None, nrmsd: float = None, depth: int = None
     ) -> None:
         self.path = path
         self.node_id = id
         self.parent_id = parent_id
         self.rmsd = rmsd
+        self.nrmsd = nrmsd
         self.depth = depth
         self.children: List[Node] = []
 
@@ -46,7 +47,7 @@ class Node:
     def write_node_info(self) -> None:
         filename = os.path.join(self.path, ".info.yml")
         with open(filename, "w") as file:
-            yaml.dump({"parent_id": self.parent_id, "rmsd": self.rmsd}, file)
+            yaml.dump({"parent_id": self.parent_id, "rmsd": self.rmsd, "nrmsd": self.nrmsd}, file)
 
     def get_relative_file(self, filename) -> str:
         return os.path.relpath(os.path.join(self.path, filename))
@@ -68,8 +69,10 @@ class Node:
         ref = pytraj.load(ref_file, top=ref_top_file, mask=load_mask)
         align_mask = SETTINGS["system"]["protein_mask"]
         pytraj.rmsd(traj, mask=align_mask, ref=ref)
-        rmsd = pytraj.rmsd_nofit(traj, mask=SETTINGS["system"]["ligand_mask"], ref=ref)
+        ligand_mask = SETTINGS["system"]["ligand_mask"]
+        rmsd = pytraj.rmsd_nofit(traj, mask=ligand_mask, ref=ref)
         self.rmsd = float(rmsd[0])
+        self.nrmsd = self.rmsd / traj[ligand_mask].top.n_atoms
         self.write_node_info()
         return self.rmsd
 
@@ -84,12 +87,14 @@ class Tree:
         max_nodes: int = 500,
         min_relative_improvement: float = 0.1,
         min_absolute_improvement: float = 0.1,
-        max_steps_back: int = 5
+        max_steps_back: int = 5,
+        use_normalized_rmsd: bool = True,
     ) -> None:
         self.path = path
         self.max_children = max_children
         self.max_depth = max_depth
         self.tolerance = tolerance
+        self.use_normalized_rmsd = use_normalized_rmsd
         self.max_nodes = max_nodes
         self.min_relative_improvement = min_relative_improvement
         self.min_absolute_improvement = min_absolute_improvement
@@ -112,6 +117,9 @@ class Tree:
 
     def get_next_id(self) -> int:
         return max(list(self.nodes), default=0) + 1
+
+    def get_metric(self, node: Node) -> float:
+        return node.nrmsd if self.use_normalized_rmsd else node.rmsd
 
     def create_node(
         self,
@@ -204,7 +212,7 @@ class Tree:
     def choose_candidate_node(self) -> Node:
         candidate: Node = sorted(
             [node for node in self.nodes.values() if self.is_expandable(node)],
-            key=lambda n: n.rmsd,
+            key=self.get_metric,
         )[0]
         logger.info(f"candidate selected: {candidate.node_id}")
         return candidate
@@ -228,18 +236,18 @@ class Tree:
         return can_grow
 
     def is_expandable(self, node: Node) -> bool:
-        parent_rmsd = (
-            self.nodes[node.parent_id].rmsd if node.parent_id is not None else math.inf
+        parent_metric = (
+            self.get_metric(self.nodes[node.parent_id]) if node.parent_id is not None else math.inf
         )
         node_depth_is_acceptable = self.max_depth > node.depth > (self.current_max_depth - self.max_steps_back)
         children_count_is_acceptable = len(node.children) < self.max_children
-        min_acceptable_rmsd = max(
-            parent_rmsd - self.min_absolute_improvement,
-            parent_rmsd * (1 - self.min_relative_improvement)
+        min_acceptable_metric = max(
+            parent_metric - self.min_absolute_improvement,
+            parent_metric * (1 - self.min_relative_improvement)
         )
-        rmsd_improvement_is_enough = node.rmsd < min_acceptable_rmsd
+        metric_improvement_is_enough = self.get_metric(node) < min_acceptable_metric
         is_expandable = all([
-            node_depth_is_acceptable, children_count_is_acceptable, rmsd_improvement_is_enough
+            node_depth_is_acceptable, children_count_is_acceptable, metric_improvement_is_enough
         ])
         if not is_expandable:
             logger.debug(f"node {node.node_id} can't be expanded")
@@ -247,7 +255,7 @@ class Tree:
 
     def has_converged(self) -> bool:
         has_converged = any(
-            node.rmsd <= self.tolerance for node in list(self.nodes.values())
+            self.get_metric(node) <= self.tolerance for node in list(self.nodes.values())
         )
         msg = "Tree converged " if has_converged else "Tree didn't converge "
         msg += f"after exploring {len(self.nodes)}/{self.max_nodes}"
@@ -255,7 +263,7 @@ class Tree:
         return has_converged
 
     def get_best_node(self) -> Node:
-        return sorted([node for node in self.nodes.values()], key=lambda n: n.rmsd)[0]
+        return sorted([node for node in self.nodes.values()], key=self.get_metric)[0]
 
     def get_solution_path(self) -> List[int]:
         node_ids = []
