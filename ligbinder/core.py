@@ -7,7 +7,7 @@ from parmed.tools.actions import HMassRepartition
 from ligbinder.settings import SETTINGS
 from ligbinder.tree import Node, Tree
 from ligbinder.md import AmberMDEngine
-
+from ligbinder import VERSION
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +28,7 @@ class LigBinder:
         return None
 
     def run(self):
+        metric_name = "nrmsd" if self.tree.use_normalized_rmsd else "rmsd"
         self.setup_hmr()
         if len(self.tree.nodes) == 0:
             logger.info("No root node found. Instantiating...")
@@ -36,14 +37,17 @@ class LigBinder:
             node: Node = self.tree.create_node_from_candidate()
             logger.info("New node chosen for expansion.")
             logger.info(f"\tdepth: {node.depth}/{self.tree.max_depth}")
-            parent_rmsd = self.tree.nodes[node.parent_id].rmsd
-            logger.info(f"\trmsd: {parent_rmsd:.3f}")
+            parent_node = self.tree.nodes[node.parent_id]
+            parent_metric = self.tree.get_metric(parent_node)
+            logger.info(f"\t{metric_name}: {parent_metric:.3f}")
             engine = AmberMDEngine(node.path, **SETTINGS["md"])
             engine.run()
             node.calc_node_rmsd()
-            if node.rmsd < parent_rmsd:
+            node_metric = self.tree.get_metric(node)
+            if node_metric < parent_metric:
                 logger.info(
-                    f"Node {node.node_id} improved rmsd by {parent_rmsd - node.rmsd:.3f}! current rmsd: {node.rmsd:.3f}"
+                    f"Node {node.node_id} improved {metric_name} by {parent_metric - node_metric:.3f}!"
+                    f" current {metric_name}: {node_metric:.3f}"
                 )
         logger.info("Exploration finished.")
         Reporter(self.tree).compile_results()
@@ -57,3 +61,9 @@ class LigBinder:
         HMassRepartition(parm).execute()
         parm.write_parm(top_file)
         logger.info("HMR applied")
+
+    def log_initial_info(self):
+        logger.info(f"Running ligbinder v{VERSION}")
+        logger.info(f"Current directory: {os.path.abspath(os.path.getcwd())}")
+        logger.info("Full settings for this run:")
+        logger.info(SETTINGS)

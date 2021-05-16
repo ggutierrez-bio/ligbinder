@@ -5,7 +5,6 @@ import logging
 import os
 from ligbinder.core import LigBinder
 from ligbinder.settings import SETTINGS
-from ligbinder import VERSION
 
 def get_parser():
     parser = argparse.ArgumentParser()
@@ -41,7 +40,5 @@ args = parser.parse_args()
 logging.basicConfig(level=args.verbosity, filename=args.log, filemode='w')
 config_file = args.config if args.config is not None else os.path.join(args.path, SETTINGS["config_file"])
 config_file = config_file if os.path.exists(config_file) else None
-logger = logging.getLogger("LigBinder")
-logger.info(f"Running ligbinder v{VERSION}")
 ligbinder = LigBinder(path=args.path, config_file=config_file)
 ligbinder.run()
