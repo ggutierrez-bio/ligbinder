@@ -28,6 +28,7 @@ class LigBinder:
         return None
 
     def run(self):
+        self.log_initial_info()
         metric_name = "nrmsd" if self.tree.use_normalized_rmsd else "rmsd"
         self.setup_hmr()
         if len(self.tree.nodes) == 0:
