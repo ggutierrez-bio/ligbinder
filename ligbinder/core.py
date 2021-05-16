@@ -65,6 +65,6 @@ class LigBinder:
 
     def log_initial_info(self):
         logger.info(f"Running ligbinder v{VERSION}")
-        logger.info(f"Current directory: {os.path.abspath(os.path.getcwd())}")
+        logger.info(f"Current directory: {os.path.abspath(os.getcwd())}")
         logger.info("Full settings for this run:")
         logger.info(SETTINGS)
