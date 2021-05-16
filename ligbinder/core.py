@@ -67,4 +67,4 @@ class LigBinder:
         logger.info(f"Running ligbinder v{VERSION}")
         logger.info(f"Current directory: {os.path.abspath(os.getcwd())}")
         logger.info("Full settings for this run:")
-        logger.info(SETTINGS)
+        logger.info(SETTINGS.data)
