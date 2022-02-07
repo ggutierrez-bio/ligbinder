@@ -11,6 +11,8 @@ tree:
     min_relative_improvement: 0.1   # minimum rmsd improvement in relation to current rmsd. default is 10% (0.1)
     min_absolute_improvement: 1.0   # minimum rmsd improvement in absolute value
     max_steps_back: 5               # maximum difference between maximum depth reached and current depth
+    use_normalized_rmsd: true       # use rmsd divided by the atom count in ligand mask. set to false
+                                    # to use the rmsd regardless of the selection size
 
 data_files:
     crd_file: "./data/pose.rst7"        # default location for project starting pose

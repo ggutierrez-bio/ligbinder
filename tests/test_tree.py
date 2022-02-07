@@ -49,10 +49,18 @@ def test_tree_create_node(basic_tree: Tree):
     assert os.path.exists(os.path.join(node.path, "ref.crd"))
 
 
-def test_tree_has_converged(basic_tree):
+@pytest.mark.parametrize(
+    "use_normalized_rmsd",
+    [
+        pytest.param(False, id="rmsd"),
+        pytest.param(True, id="normalized rmsd")
+    ]
+)
+def test_tree_has_converged(use_normalized_rmsd, basic_tree: Tree):
+    basic_tree.use_normalized_rmsd = use_normalized_rmsd
     basic_tree.create_root_node()
     assert basic_tree.has_converged() is False
-    basic_tree.nodes[0].rmsd = 0.2
+    basic_tree.nodes[0].nrmsd = basic_tree.nodes[0].rmsd = 0.2
     assert basic_tree.has_converged() is True
 
 
@@ -68,41 +76,65 @@ def test_tree_load_nodes(basic_tree):
         assert tree.nodes[id].parent_id == basic_tree.nodes[id].parent_id
 
 
-def test_tree_expandability(basic_tree: Tree):
+@pytest.mark.parametrize(
+    "use_normalized_rmsd",
+    [
+        pytest.param(False, id="rmsd"),
+        pytest.param(True, id="normalized rmsd")
+    ]
+)
+def test_tree_expandability(use_normalized_rmsd, basic_tree: Tree):
+    basic_tree.use_normalized_rmsd = use_normalized_rmsd
     basic_tree.max_children = 2
     basic_tree.max_depth = 1
     basic_tree.create_root_node()
     node = basic_tree.create_node(0)
     node.rmsd = basic_tree.nodes[0].rmsd + 1
+    node.nrmsd = basic_tree.nodes[0].nrmsd + 1
     basic_tree.max_nodes = 1
     assert basic_tree.can_grow() is False
     basic_tree.max_nodes = 500
     assert basic_tree.can_grow()
     node = basic_tree.create_node_from_candidate()
     node.rmsd = basic_tree.nodes[0].rmsd + 1
+    node.nrmsd = basic_tree.nodes[0].nrmsd + 1
     assert basic_tree.can_grow() is False
 
 
-def test_node_expandability(basic_tree: Tree):
+@pytest.mark.parametrize(
+    "use_normalized_rmsd",
+    [
+        pytest.param(False, id="rmsd"),
+        pytest.param(True, id="normalized rmsd")
+    ]
+)
+def test_node_expandability(basic_tree: Tree, use_normalized_rmsd):
+    basic_tree.use_normalized_rmsd = use_normalized_rmsd
     basic_tree.create_root_node()
-    parent_rmsd = basic_tree.nodes[0].rmsd
-
+    parent_node = basic_tree.nodes[0]
+    parent_metric = basic_tree.get_metric(parent_node)
     # deactivate relative improvement check
     basic_tree.min_relative_improvement = 1
 
     node = basic_tree.create_node(0)
-    node.rmsd = parent_rmsd - 0.5 * basic_tree.min_absolute_improvement
+    node_metric = parent_metric - 0.5 * basic_tree.min_absolute_improvement
+    node.nrmsd = node.rmsd = node_metric
     assert basic_tree.is_expandable(node) is False
-    node.rmsd = parent_rmsd - 1.5 * basic_tree.min_absolute_improvement
+
+    node_metric = parent_metric - 1.5 * basic_tree.min_absolute_improvement
+    node.nrmsd = node.rmsd = node_metric
     assert basic_tree.is_expandable(node) is True
 
     # deactivate absolute improvement check and reactivate relative
-    basic_tree.min_absolute_improvement = parent_rmsd
+    basic_tree.min_absolute_improvement = parent_metric
     basic_tree.min_relative_improvement = 0.1
 
-    node.rmsd = parent_rmsd * (1 - 0.5 * basic_tree.min_relative_improvement)
+    node_metric = parent_metric * (1 - 0.5 * basic_tree.min_relative_improvement)
+    node.nrmsd = node.rmsd = node_metric
     assert basic_tree.is_expandable(node) is False
-    node.rmsd = parent_rmsd * (1 - 1.5 * basic_tree.min_relative_improvement)
+
+    node_metric = parent_metric * (1 - 1.5 * basic_tree.min_relative_improvement)
+    node.nrmsd = node.rmsd = node_metric
     assert basic_tree.is_expandable(node) is True
 
 
