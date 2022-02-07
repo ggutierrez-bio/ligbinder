@@ -93,36 +93,59 @@ the currently available parameters are:
 ```
 tree:
     max_depth: 20                   # maximum number of successive iterations
-    max_children: 5                 # maximum number of dynamics spawn from a single intermediate iteration
-    tolerance: 0.2                  # rmsd tolerance to accept a node as a hit
+    max_children: 10                # maximum number of dynamics spawn from a single intermediate iteration
+    tolerance: 0.5                  # rmsd tolerance to accept a node as a hit
     max_nodes: 500                  # maximum number of nodes in total
     min_relative_improvement: 0.1   # minimum rmsd improvement in relation to current rmsd. default is 10% (0.1)
-    min_absolute_improvement: 0.1   # minimum rmsd improvement in absolute value
+    min_absolute_improvement: 1.0   # minimum rmsd improvement in absolute value
     max_steps_back: 5               # maximum difference between maximum depth reached and current depth
+    use_normalized_rmsd: true       # use rmsd divided by the atom count in ligand mask. set to false
+                                    # to use the rmsd regardless of the selection size
 
 data_files:
-    crd_file: "./data/pose.rst7"    # default location for project starting pose
-    top_file: "./data/top.prmtop"   # default location for project topology file
-    ref_file: "./data/ref.crd"      # default location for project reference file
+    crd_file: "./data/pose.rst7"        # default location for project starting pose
+    top_file: "./data/top.prmtop"       # default location for project topology file
+    ref_file: "./data/ref.crd"          # default location for project reference file
+    ref_top_file: "./data/top.prmtop"   # default location for project reference topology
+                                        # it will usually be the same as the trajectory, but
+                                        # just in case, this can be also configured
 
 system:
-    protein_mask: "@CA"     # mask for system alignment
-    ligand_mask: ":LIG"     # mask for ligand rmsd calculation
-
+    protein_mask: "@CA&!:LIG"           # mask for system alignment.
+                                        # default is alpha carbon and not a ligand atom
+    ligand_mask: ":LIG&!@H="            # mask for ligand rmsd calculation
+                                        # default is ligand atoms that are not hydrogen
+    restraint_mask: "@CA&!:LIG"         # mask for restraints
+                                        # default is alpha carbon and not a ligand atom
+    load_mask: "@CA|(:LIG&!@H=)"        # mask for system loading.
+                                        # reference and problem system must end up having
+                                        # equivalent topologies when this mask is applied
 md:
-    crd_file: "initial.rst7"    # default name for node starting file
-    top_file: "top.prmtop"      # default name for node topology file
-    trj_file: "traj.nc"         # default name for node trajectory file
-    rst_file: "final.rst7"      # default name for node final structure file
-    ref_file: "ref.crd"         # default name for node reference file
-    log_file: "md.log"          # default name for md logging file
-    inp_file: "md.in"           # default name for md input file
-    use_hmr: true               # use hydrogen mass repartitioning. default is true
-    tstep: 4                    # integration time of 4fs. reduce to 2 if use_hmr is set to false
-    iteration_steps: 250000     # md steps. 250k * 4fs = 1 nano per node
-    use_gpu: true               # specify md engine version to use. use pmemd.cuda by default.
-                                # if use_gpu is set to false, sander is used instead.
-                                # it is useful for debugging, but too slow for production.
+    crd_file: "initial.rst7"        # default name for node starting file
+    top_file: "top.prmtop"          # default name for node topology file
+    trj_file: "traj.nc"             # default name for node trajectory file
+    rst_file: "final.rst7"          # default name for node final structure file
+    ref_file: "ref.crd"             # default name for node reference file
+    log_file: "md.log"              # default name for md logging file
+    inp_file: "md.in"               # default name for md input file
+    use_hmr: true                   # use hydrogen mass repartitioning. default is true
+    tstep: 4                        # integration time of 4fs. reduce to 2 if use_hmr is set to false
+    steps: 250000                   # md steps. 250k * 4fs = 1 nano per node
+    apply_restraints: true          # if true, apply restraints based on system.restraint_mask
+    restraint_force: 1.0            # in kcal/mol A^2
+    use_gpu: true                   # specify md engine version to use. use pmemd.cuda by default.
+                                    # if use_gpu is set to false, sander is used instead.
+                                    # it is useful for debugging, but too slow for production.
+
+config_file: "config.yml"
+
+results:
+    join_trajectories: true
+    report_dir: "results"
+    idx_file: "nodes.lst"
+    trj_file: "full_path.nc"
+    rms_file: "nodes.rmsd"
+    stats_file: "stats.txt"
 ```
 
 ## running in cte-power9
