@@ -31,7 +31,8 @@ class Node:
         id = Node.get_id_from_path(path)
         parent_id = config.get("parent_id", 0)
         rmsd = config.get("rmsd")
-        return Node(path, id, parent_id, rmsd)
+        nrmsd = config.get("nrmsd")
+        return Node(path, id, parent_id, rmsd=rmsd, nrmsd=nrmsd)
 
     @staticmethod
     def get_id_from_path(path: str):
